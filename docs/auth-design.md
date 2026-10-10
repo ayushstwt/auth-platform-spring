@@ -1,6 +1,6 @@
 # Authentication & Token Design Architecture
 
-This document describes the security architecture, cryptographic primitives, and token lifecycle management implemented in `user-service`.
+This document describes the security architecture, cryptographic primitives, and token lifecycle management implemented in `auth-platform-spring`.
 
 ---
 
@@ -18,8 +18,8 @@ This document describes the security architecture, cryptographic primitives, and
   - `sub`: User ID (`id.toString()`)
   - `email`: Normalized user email address
   - `roles`: Set of assigned roles (`ROLE_USER`, `ROLE_ADMIN`)
-  - `iss`: Token issuer (`user-service`)
-  - `aud`: Token audience (`user-service-api`)
+  - `iss`: Token issuer (`auth-platform-spring`)
+  - `aud`: Token audience (`auth-platform-spring-api`)
   - `jti`: Unique token UUID (prevents replay)
   - `iat`: Issued-at epoch seconds (UTC)
   - `exp`: Expiration epoch seconds (UTC)

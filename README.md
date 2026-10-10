@@ -21,10 +21,10 @@ Create separate databases for local development and test execution:
 psql -U postgres
 
 -- Create development database
-CREATE DATABASE userservice_dev;
+CREATE DATABASE authplatform_dev;
 
 -- Create testing database
-CREATE DATABASE userservice_test;
+CREATE DATABASE authplatform_test;
 ```
 
 ---
@@ -38,14 +38,14 @@ Copy `.env.example` to `.env` or export environment variables in your environmen
 | `SERVER_PORT` | HTTP Server port | `8080` | No |
 | `DB_HOST` | PostgreSQL host | `localhost` | Yes |
 | `DB_PORT` | PostgreSQL port | `5432` | Yes |
-| `DB_NAME` | PostgreSQL database name | `userservice_dev` | Yes |
+| `DB_NAME` | PostgreSQL database name | `authplatform_dev` | Yes |
 | `DB_USERNAME` | PostgreSQL username | `postgres` | Yes |
 | `DB_PASSWORD` | PostgreSQL password | `postgres` | Yes |
 | `DB_MAX_POOL_SIZE` | HikariCP max connection pool size | `10` | No |
 | `DB_MIN_IDLE` | HikariCP min idle connections | `2` | No |
 | `TEST_DB_HOST` | PostgreSQL test database host | `localhost` | No (defaults to memory/local test) |
 | `TEST_DB_PORT` | PostgreSQL test database port | `5432` | No |
-| `TEST_DB_NAME` | PostgreSQL test database name | `userservice_test` | No |
+| `TEST_DB_NAME` | PostgreSQL test database name | `authplatform_test` | No |
 | `TEST_DB_USERNAME` | PostgreSQL test database user | `postgres` | No |
 | `TEST_DB_PASSWORD` | PostgreSQL test database password | `postgres` | No |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed origins | `http://localhost:3000,http://localhost:5173` | Yes |
@@ -85,7 +85,7 @@ Every endpoint returns a consistent JSON envelope:
   "status": "success",
   "message": "Service is healthy",
   "data": {
-    "service": "user-service",
+    "service": "auth-platform-spring",
     "status": "UP",
     "timestamp": "2026-10-11T01:15:00Z"
   },

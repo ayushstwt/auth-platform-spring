@@ -1,5 +1,5 @@
 -- V1__init_user_log.sql
--- Base audit log table and indexes for user-service
+-- Base audit log table and indexes for auth-platform-spring
 
 CREATE TABLE IF NOT EXISTS user_log (
     id BIGSERIAL PRIMARY KEY,

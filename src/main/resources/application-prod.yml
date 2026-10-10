@@ -18,5 +18,5 @@ springdoc:
 logging:
   level:
     root: INFO
-    com.iosocket.userservice: INFO
+    com.ayshriv.authplatform: INFO
     org.springframework.security: WARN
