@@ -16,5 +16,6 @@ public enum LogAction {
     ACCOUNT_UPDATE,
     ACCOUNT_LOCK,
     TOKEN_REFRESH,
+    TOKEN_REUSE_DETECTED,
     SYSTEM
 }
