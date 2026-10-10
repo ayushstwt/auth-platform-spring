@@ -135,10 +135,68 @@ Every HTTP request is assigned or preserves a unique `X-Request-Id` correlation 
 ## 6. Project Roadmap Status
 
 - [x] **Phase 1: Foundation** (`feature/01-foundation` -> `v0.1.0`)
-- [ ] **Phase 2: Basic Auth** (`feature/02-basic-auth` -> `v0.2.0`)
+- [x] **Phase 2: Basic Auth** (`feature/02-basic-auth` -> `v0.2.0`)
 - [ ] **Phase 3: Email OTP** (`feature/03-email-otp` -> `v0.3.0`)
 - [ ] **Phase 4: Phone OTP** (`feature/04-phone-otp` -> `v0.4.0`)
 - [ ] **Phase 5: Google OAuth** (`feature/05-google-oauth` -> `v0.5.0`)
 - [ ] **Phase 6: MFA** (`feature/06-mfa` -> `v0.6.0`)
 - [ ] **Phase 7: Hardening** (`feature/07-hardening` -> `v0.7.0`)
 - [ ] **Phase 8: Release** (`release/1.0.0` -> `v1.0.0`)
+
+---
+
+## 7. Authentication Endpoints & Examples
+
+### 1. Register a new user
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane.doe@example.com",
+    "password": "StrongPassword123!",
+    "firstName": "Jane",
+    "lastName": "Doe"
+  }'
+```
+
+### 2. Login
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane.doe@example.com",
+    "password": "StrongPassword123!"
+  }'
+```
+
+### 3. Rotate Refresh Token
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "<REFRESH_TOKEN>"
+  }'
+```
+
+### 4. Get Current User Profile
+```bash
+curl -X GET http://localhost:8080/api/v1/users/me \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+### 5. Change Password
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/change-password \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "currentPassword": "StrongPassword123!",
+    "newPassword": "BrandNewPassword123!"
+  }'
+```
+
+### 6. Public JWKS Key Set
+```bash
+curl -X GET http://localhost:8080/.well-known/jwks.json
+```
+
