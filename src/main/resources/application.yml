@@ -62,3 +62,13 @@ app:
       allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type,X-Request-Id,Accept,Origin}
       allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
       max-age-seconds: ${CORS_MAX_AGE_SECONDS:3600}
+    jwt:
+      issuer: ${JWT_ISSUER:user-service}
+      audience: ${JWT_AUDIENCE:user-service-api}
+      access-token-expiry-minutes: ${JWT_ACCESS_TOKEN_EXPIRY_MINUTES:15}
+      refresh-token-expiry-days: ${JWT_REFRESH_TOKEN_EXPIRY_DAYS:7}
+      private-key-location: ${JWT_PRIVATE_KEY_LOCATION:}
+      public-key-location: ${JWT_PUBLIC_KEY_LOCATION:}
+    auth:
+      max-failed-attempts: ${AUTH_MAX_FAILED_ATTEMPTS:5}
+      lockout-duration-minutes: ${AUTH_LOCKOUT_DURATION_MINUTES:15}

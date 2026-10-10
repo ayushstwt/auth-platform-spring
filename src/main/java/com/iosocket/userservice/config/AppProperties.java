@@ -13,7 +13,9 @@ public record AppProperties(
         @NotNull SecurityProperties security
 ) {
     public record SecurityProperties(
-            @NotNull CorsProperties cors
+            @NotNull CorsProperties cors,
+            @NotNull JwtProperties jwt,
+            @NotNull AuthProperties auth
     ) {
     }
 
@@ -23,6 +25,22 @@ public record AppProperties(
             @NotEmpty List<String> allowedHeaders,
             boolean allowCredentials,
             long maxAgeSeconds
+    ) {
+    }
+
+    public record JwtProperties(
+            @NotEmpty String issuer,
+            @NotEmpty String audience,
+            long accessTokenExpiryMinutes,
+            long refreshTokenExpiryDays,
+            String privateKeyLocation,
+            String publicKeyLocation
+    ) {
+    }
+
+    public record AuthProperties(
+            int maxFailedAttempts,
+            long lockoutDurationMinutes
     ) {
     }
 }

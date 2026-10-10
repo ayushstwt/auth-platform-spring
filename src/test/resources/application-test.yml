@@ -29,3 +29,22 @@ logging:
     root: INFO
     com.iosocket.userservice: DEBUG
     org.springframework.security: WARN
+
+app:
+  security:
+    cors:
+      allowed-origins: http://localhost:3000
+      allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+      allowed-headers: Authorization,Content-Type,X-Request-Id,Accept,Origin
+      allow-credentials: true
+      max-age-seconds: 3600
+    jwt:
+      issuer: user-service-test
+      audience: user-service-test-api
+      access-token-expiry-minutes: 15
+      refresh-token-expiry-days: 7
+      private-key-location: ""
+      public-key-location: ""
+    auth:
+      max-failed-attempts: 5
+      lockout-duration-minutes: 15
