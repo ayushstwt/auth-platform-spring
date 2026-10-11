@@ -38,3 +38,6 @@ target/
 ### OS ###
 .DS_Store
 Thumbs.db
+
+### Documentation & Reference ###
+docs/
