@@ -14,8 +14,44 @@ public record AppProperties(
         @NotNull OtpProperties otp,
         @NotNull EmailProperties email,
         @NotNull SmsProperties sms,
-        @NotNull GoogleProperties google
+        @NotNull GoogleProperties google,
+        @NotNull MfaProperties mfa
 ) {
+    @org.springframework.boot.context.properties.bind.ConstructorBinding
+    public AppProperties(
+            SecurityProperties security,
+            OtpProperties otp,
+            EmailProperties email,
+            SmsProperties sms,
+            GoogleProperties google,
+            MfaProperties mfa
+    ) {
+        this.security = security;
+        this.otp = otp;
+        this.email = email;
+        this.sms = sms;
+        this.google = google;
+        this.mfa = mfa;
+    }
+
+    public AppProperties(
+            SecurityProperties security,
+            OtpProperties otp,
+            EmailProperties email,
+            SmsProperties sms,
+            GoogleProperties google
+    ) {
+
+        this(
+                security,
+                otp,
+                email,
+                sms,
+                google,
+                new MfaProperties("k1", java.util.Map.of("k1", "01234567890123456789012345678901"), 5, 5, 15, false, "AuthPlatform")
+        );
+    }
+
     public record SecurityProperties(
             @NotNull CorsProperties cors,
             @NotNull JwtProperties jwt,
@@ -93,6 +129,17 @@ public record AppProperties(
             @NotEmpty String redirectSuccessUrl,
             long exchangeCodeTtlSeconds,
             @NotEmpty String jwksUri
+    ) {
+    }
+
+    public record MfaProperties(
+            @NotEmpty String currentKeyId,
+            @NotEmpty java.util.Map<String, String> encryptionKeys,
+            long tokenTtlMinutes,
+            int maxAttempts,
+            long stepUpValidityMinutes,
+            boolean enforceForAdmin,
+            @NotEmpty String issuer
     ) {
     }
 }

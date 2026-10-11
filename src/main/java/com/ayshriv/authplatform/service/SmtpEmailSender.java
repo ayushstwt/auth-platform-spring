@@ -90,7 +90,44 @@ public class SmtpEmailSender implements EmailSender {
         sendWithRetry(recipientEmail, "Security alert: " + provider + " account linked", htmlBody, textBody);
     }
 
+    @Override
+    @Async("emailTaskExecutor")
+    public void sendMfaEnabledEmail(String recipientEmail, String recipientName) {
+        Context context = new Context();
+        context.setVariable("name", recipientName);
+
+        String htmlBody = templateEngine.process("mail/mfa-enabled.html", context);
+        String textBody = templateEngine.process("mail/mfa-enabled.txt", context);
+
+        sendWithRetry(recipientEmail, "Two-Factor Authentication Enabled", htmlBody, textBody);
+    }
+
+    @Override
+    @Async("emailTaskExecutor")
+    public void sendMfaDisabledEmail(String recipientEmail, String recipientName) {
+        Context context = new Context();
+        context.setVariable("name", recipientName);
+
+        String htmlBody = templateEngine.process("mail/mfa-disabled.html", context);
+        String textBody = templateEngine.process("mail/mfa-disabled.txt", context);
+
+        sendWithRetry(recipientEmail, "Two-Factor Authentication Disabled", htmlBody, textBody);
+    }
+
+    @Override
+    @Async("emailTaskExecutor")
+    public void sendRecoveryCodesRegeneratedEmail(String recipientEmail, String recipientName) {
+        Context context = new Context();
+        context.setVariable("name", recipientName);
+
+        String htmlBody = templateEngine.process("mail/recovery-codes-regenerated.html", context);
+        String textBody = templateEngine.process("mail/recovery-codes-regenerated.txt", context);
+
+        sendWithRetry(recipientEmail, "MFA Recovery Codes Regenerated", htmlBody, textBody);
+    }
+
     private void sendWithRetry(String recipientEmail, String subject, String htmlBody, String textBody) {
+
         int attempt = 0;
         long backoff = INITIAL_BACKOFF_MS;
 

@@ -6,6 +6,7 @@ import com.ayshriv.authplatform.dto.AuthResponse;
 import com.ayshriv.authplatform.dto.EmailOtpConfirmRequest;
 import com.ayshriv.authplatform.dto.EmailOtpSendRequest;
 import com.ayshriv.authplatform.dto.ForgotPasswordRequest;
+import com.ayshriv.authplatform.dto.LoginResult;
 import com.ayshriv.authplatform.dto.ResetPasswordRequest;
 import com.ayshriv.authplatform.dto.UserResponse;
 import com.ayshriv.authplatform.dto.VerifyEmailConfirmRequest;
@@ -50,6 +51,7 @@ public class EmailAuthService {
     private final PasswordPolicyValidator passwordPolicyValidator;
     private final AuditService auditService;
     private final TokenRevocationService tokenRevocationService;
+    private final AuthenticationResultService authenticationResultService;
     private final AppProperties appProperties;
 
     public EmailAuthService(UserRepository userRepository,
@@ -61,6 +63,7 @@ public class EmailAuthService {
                             PasswordPolicyValidator passwordPolicyValidator,
                             AuditService auditService,
                             TokenRevocationService tokenRevocationService,
+                            AuthenticationResultService authenticationResultService,
                             AppProperties appProperties) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -71,8 +74,10 @@ public class EmailAuthService {
         this.passwordPolicyValidator = passwordPolicyValidator;
         this.auditService = auditService;
         this.tokenRevocationService = tokenRevocationService;
+        this.authenticationResultService = authenticationResultService;
         this.appProperties = appProperties;
     }
+
 
     @Transactional
     public void sendEmailVerificationOtp(Long userId, String requestIp) {
@@ -135,7 +140,7 @@ public class EmailAuthService {
     }
 
     @Transactional
-    public AuthResponse confirmLoginOtp(EmailOtpConfirmRequest request, String requestIp, String userAgent) {
+    public LoginResult confirmLoginOtp(EmailOtpConfirmRequest request, String requestIp, String userAgent) {
         String normalizedEmail = request.email().trim().toLowerCase();
 
         OtpChallenge challenge = otpService.verifyOtp(normalizedEmail, OtpPurpose.LOGIN, request.code(), requestIp);
@@ -154,25 +159,9 @@ public class EmailAuthService {
         user.setLastLoginAt(Instant.now());
         userRepository.save(user);
 
-        String accessToken = jwtTokenService.generateAccessToken(user);
-        String rawRefreshToken = TokenHashUtils.generateSecureToken();
-        String refreshTokenHash = TokenHashUtils.hashToken(rawRefreshToken);
-        String familyId = UUID.randomUUID().toString();
-        Instant expiresAt = Instant.now().plus(Duration.ofDays(appProperties.security().jwt().refreshTokenExpiryDays()));
-
-        RefreshToken refreshToken = new RefreshToken(user, refreshTokenHash, familyId, expiresAt, requestIp, userAgent);
-        refreshTokenRepository.save(refreshToken);
-
-        auditService.recordActivity(user.getId(), LogAction.LOGIN, LogSubAction.SUCCESS);
-        log.info("OTP Login successful for user id={}", user.getId());
-
-        return AuthResponse.of(
-                accessToken,
-                rawRefreshToken,
-                jwtTokenService.getAccessTokenExpirySeconds(),
-                UserResponse.from(user)
-        );
+        return authenticationResultService.processAuthentication(user, "email_otp", LogAction.LOGIN, requestIp, userAgent);
     }
+
 
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request, String requestIp) {

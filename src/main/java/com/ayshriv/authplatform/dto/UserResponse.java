@@ -17,6 +17,7 @@ public record UserResponse(
         String phoneE164,
         boolean phoneVerified,
         boolean hasPassword,
+        boolean mfaEnabled,
         UserStatus status,
         Set<String> roles,
         Instant createdOn
@@ -35,6 +36,7 @@ public record UserResponse(
                 user.getPhoneE164(),
                 user.isPhoneVerified(),
                 user.isHasPassword(),
+                user.isMfaEnabled(),
                 user.getStatus(),
                 roleNames,
                 user.getCreatedOn()

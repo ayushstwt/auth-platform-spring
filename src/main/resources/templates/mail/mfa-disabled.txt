@@ -1,0 +1,8 @@
+Hello [(${name})],
+
+Two-factor authentication (MFA) has been disabled on your account.
+
+If you did not perform this action, someone may have unauthorized access to your account. Please change your password and secure your account immediately.
+
+--
+Ayshriv Auth Platform

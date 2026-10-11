@@ -4,6 +4,7 @@ import com.ayshriv.authplatform.config.AppProperties;
 import com.ayshriv.authplatform.constants.ErrorMessages;
 import com.ayshriv.authplatform.dto.AuthResponse;
 import com.ayshriv.authplatform.dto.LoginRequest;
+import com.ayshriv.authplatform.dto.LoginResult;
 import com.ayshriv.authplatform.dto.RefreshTokenRequest;
 import com.ayshriv.authplatform.dto.RegisterRequest;
 import com.ayshriv.authplatform.dto.UserResponse;
@@ -50,6 +51,7 @@ public class AuthService {
     private final AuditService auditService;
     private final UserLockoutService userLockoutService;
     private final TokenRevocationService tokenRevocationService;
+    private final AuthenticationResultService authenticationResultService;
     private final AppProperties appProperties;
 
     public AuthService(UserRepository userRepository,
@@ -61,6 +63,7 @@ public class AuthService {
                        AuditService auditService,
                        UserLockoutService userLockoutService,
                        TokenRevocationService tokenRevocationService,
+                       AuthenticationResultService authenticationResultService,
                        AppProperties appProperties) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -71,8 +74,10 @@ public class AuthService {
         this.auditService = auditService;
         this.userLockoutService = userLockoutService;
         this.tokenRevocationService = tokenRevocationService;
+        this.authenticationResultService = authenticationResultService;
         this.appProperties = appProperties;
     }
+
 
     @Transactional
     public UserResponse register(RegisterRequest request, String ipAddress, String userAgent) {
@@ -104,7 +109,7 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse login(LoginRequest request, String ipAddress, String userAgent) {
+    public LoginResult login(LoginRequest request, String ipAddress, String userAgent) {
         String normalizedEmail = request.email().trim().toLowerCase();
         Optional<User> userOpt = userRepository.findByEmail(normalizedEmail);
 
@@ -141,25 +146,9 @@ public class AuthService {
         userLockoutService.resetFailedLogins(user.getId());
         handleSuccessfulLogin(user, request.password());
 
-        String accessToken = jwtTokenService.generateAccessToken(user);
-        String rawRefreshToken = TokenHashUtils.generateSecureToken();
-        String refreshTokenHash = TokenHashUtils.hashToken(rawRefreshToken);
-        String familyId = UUID.randomUUID().toString();
-        Instant expiresAt = Instant.now().plus(Duration.ofDays(appProperties.security().jwt().refreshTokenExpiryDays()));
-
-        RefreshToken refreshToken = new RefreshToken(user, refreshTokenHash, familyId, expiresAt, ipAddress, userAgent);
-        refreshTokenRepository.save(refreshToken);
-
-        auditService.recordActivity(user.getId(), LogAction.LOGIN, LogSubAction.SUCCESS);
-        log.info("Login successful for user id={}", user.getId());
-
-        return AuthResponse.of(
-                accessToken,
-                rawRefreshToken,
-                jwtTokenService.getAccessTokenExpirySeconds(),
-                UserResponse.from(user)
-        );
+        return authenticationResultService.processAuthentication(user, "pwd", LogAction.LOGIN, ipAddress, userAgent);
     }
+
 
     @Transactional
     public AuthResponse refreshToken(RefreshTokenRequest request, String ipAddress, String userAgent) {

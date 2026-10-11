@@ -3,6 +3,7 @@ package com.ayshriv.authplatform.service;
 import com.ayshriv.authplatform.constants.ErrorMessages;
 import com.ayshriv.authplatform.dto.AuthResponse;
 import com.ayshriv.authplatform.dto.FederatedIdentityResponse;
+import com.ayshriv.authplatform.dto.LoginResult;
 import com.ayshriv.authplatform.entity.FederatedIdentity;
 import com.ayshriv.authplatform.entity.LogAction;
 import com.ayshriv.authplatform.entity.LogSubAction;
@@ -71,17 +72,17 @@ public class GoogleAuthService {
     }
 
     @Transactional
-    public AuthResponse loginWithIdToken(String idToken, String ipAddress, String userAgent) {
+    public LoginResult loginWithIdToken(String idToken, String ipAddress, String userAgent) {
         enforceRateLimit(ipAddress);
 
         GoogleIdTokenPayload payload = googleTokenVerifier.verify(idToken);
         User user = processGooglePayload(payload);
 
-        return authenticationResultService.issueTokens(user, LogAction.GOOGLE_LOGIN, ipAddress, userAgent);
+        return authenticationResultService.processAuthentication(user, "google", LogAction.GOOGLE_LOGIN, ipAddress, userAgent);
     }
 
     @Transactional
-    public AuthResponse exchangeCode(String exchangeCode, String ipAddress, String userAgent) {
+    public LoginResult exchangeCode(String exchangeCode, String ipAddress, String userAgent) {
         enforceRateLimit(ipAddress);
 
         Long userId = oAuthExchangeCodeService.consumeCode(exchangeCode);
@@ -96,8 +97,9 @@ public class GoogleAuthService {
         user.setLastLoginAt(Instant.now());
         userRepository.save(user);
 
-        return authenticationResultService.issueTokens(user, LogAction.GOOGLE_LOGIN, ipAddress, userAgent);
+        return authenticationResultService.processAuthentication(user, "google", LogAction.GOOGLE_LOGIN, ipAddress, userAgent);
     }
+
 
     @Transactional
     public User processGooglePayload(GoogleIdTokenPayload payload) {

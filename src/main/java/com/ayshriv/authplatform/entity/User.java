@@ -54,6 +54,19 @@ public class User extends BaseEntity {
     @Column(name = "HAS_PASSWORD", nullable = false)
     private boolean hasPassword = true;
 
+    @Basic(optional = false)
+    @Column(name = "MFA_ENABLED", nullable = false)
+    private boolean mfaEnabled = false;
+
+    @Column(name = "TOTP_SECRET_ENCRYPTED", length = 512)
+    private String totpSecretEncrypted;
+
+    @Column(name = "TOTP_KEY_ID", length = 50)
+    private String totpKeyId;
+
+    @Column(name = "TOTP_LAST_TIMESTEP")
+    private Long totpLastTimestep;
+
     @Enumerated(EnumType.STRING)
     @Basic(optional = false)
     @Column(name = "STATUS", nullable = false, length = 20)
@@ -150,6 +163,38 @@ public class User extends BaseEntity {
 
     public void setHasPassword(boolean hasPassword) {
         this.hasPassword = hasPassword;
+    }
+
+    public boolean isMfaEnabled() {
+        return mfaEnabled;
+    }
+
+    public void setMfaEnabled(boolean mfaEnabled) {
+        this.mfaEnabled = mfaEnabled;
+    }
+
+    public String getTotpSecretEncrypted() {
+        return totpSecretEncrypted;
+    }
+
+    public void setTotpSecretEncrypted(String totpSecretEncrypted) {
+        this.totpSecretEncrypted = totpSecretEncrypted;
+    }
+
+    public String getTotpKeyId() {
+        return totpKeyId;
+    }
+
+    public void setTotpKeyId(String totpKeyId) {
+        this.totpKeyId = totpKeyId;
+    }
+
+    public Long getTotpLastTimestep() {
+        return totpLastTimestep;
+    }
+
+    public void setTotpLastTimestep(Long totpLastTimestep) {
+        this.totpLastTimestep = totpLastTimestep;
     }
 
     public UserStatus getStatus() {

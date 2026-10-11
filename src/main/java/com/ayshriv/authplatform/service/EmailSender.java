@@ -9,4 +9,11 @@ public interface EmailSender {
     void sendPasswordResetEmail(String recipientEmail, String recipientName, String otpCode);
 
     void sendAccountLinkedEmail(String recipientEmail, String recipientName, String provider);
+ 
+    void sendMfaEnabledEmail(String recipientEmail, String recipientName);
+
+    void sendMfaDisabledEmail(String recipientEmail, String recipientName);
+
+    void sendRecoveryCodesRegeneratedEmail(String recipientEmail, String recipientName);
 }
+

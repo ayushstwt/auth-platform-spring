@@ -24,9 +24,12 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
+    private final com.ayshriv.authplatform.config.AppProperties appProperties;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService,
+                           com.ayshriv.authplatform.config.AppProperties appProperties) {
         this.userService = userService;
+        this.appProperties = appProperties;
     }
 
     @GetMapping("/users")
@@ -35,6 +38,7 @@ public class AdminController {
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        checkAdminMfaEnforcement();
         Page<UserResponse> usersPage = userService.getAllUsers(PageRequest.of(page, size, Sort.by("id").descending()));
         return ResponseEntity.ok(ApiResponse.success(
                 "Users retrieved successfully",
@@ -42,4 +46,21 @@ public class AdminController {
                 PageMetadata.from(usersPage)
         ));
     }
+
+    private void checkAdminMfaEnforcement() {
+        if (!appProperties.mfa().enforceForAdmin()) {
+            return;
+        }
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt jwt) {
+            java.util.List<String> amr = jwt.getClaimAsStringList("amr");
+            boolean hasMfa = amr != null && amr.stream().anyMatch(f -> f.startsWith("mfa"));
+            if (!hasMfa) {
+                throw new com.ayshriv.authplatform.exception.ForbiddenException(
+                        com.ayshriv.authplatform.constants.ErrorMessages.E034
+                );
+            }
+        }
+    }
+
 }

@@ -1,0 +1,9 @@
+Hello [(${name})],
+
+Two-factor authentication (MFA) has been successfully enabled on your account.
+Whenever you sign in, you will be prompted for a second verification factor.
+
+If you did not perform this action, please secure your account immediately.
+
+--
+Ayshriv Auth Platform

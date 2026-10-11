@@ -39,6 +39,24 @@ public class TestEmailSender implements EmailSender {
         this.lastType = "ACCOUNT_LINKED";
     }
 
+    @Override
+    public void sendMfaEnabledEmail(String recipientEmail, String recipientName) {
+        this.lastRecipient = recipientEmail;
+        this.lastType = "MFA_ENABLED";
+    }
+
+    @Override
+    public void sendMfaDisabledEmail(String recipientEmail, String recipientName) {
+        this.lastRecipient = recipientEmail;
+        this.lastType = "MFA_DISABLED";
+    }
+
+    @Override
+    public void sendRecoveryCodesRegeneratedEmail(String recipientEmail, String recipientName) {
+        this.lastRecipient = recipientEmail;
+        this.lastType = "RECOVERY_CODES_REGENERATED";
+    }
+
     public String getLastRecipient() {
         return lastRecipient;
     }
@@ -57,3 +75,4 @@ public class TestEmailSender implements EmailSender {
         this.lastType = null;
     }
 }
+

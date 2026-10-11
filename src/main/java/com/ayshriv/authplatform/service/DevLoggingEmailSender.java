@@ -55,4 +55,35 @@ public class DevLoggingEmailSender implements EmailSender {
         System.out.println(" Provider: " + provider);
         System.out.println("==================================================");
     }
+
+    @Override
+    public void sendMfaEnabledEmail(String recipientEmail, String recipientName) {
+        log.info("[DEV EMAIL] To: {} ({}) | Subject: Two-Factor Authentication Enabled",
+                LogMaskingUtils.maskEmail(recipientEmail), recipientName);
+        System.out.println("==================================================");
+        System.out.println(" [DEV EMAIL SENDER] MFA ENABLED NOTIFICATION");
+        System.out.println(" Recipient: " + recipientEmail);
+        System.out.println("==================================================");
+    }
+
+    @Override
+    public void sendMfaDisabledEmail(String recipientEmail, String recipientName) {
+        log.info("[DEV EMAIL] To: {} ({}) | Subject: Two-Factor Authentication Disabled",
+                LogMaskingUtils.maskEmail(recipientEmail), recipientName);
+        System.out.println("==================================================");
+        System.out.println(" [DEV EMAIL SENDER] MFA DISABLED NOTIFICATION");
+        System.out.println(" Recipient: " + recipientEmail);
+        System.out.println("==================================================");
+    }
+
+    @Override
+    public void sendRecoveryCodesRegeneratedEmail(String recipientEmail, String recipientName) {
+        log.info("[DEV EMAIL] To: {} ({}) | Subject: MFA Recovery Codes Regenerated",
+                LogMaskingUtils.maskEmail(recipientEmail), recipientName);
+        System.out.println("==================================================");
+        System.out.println(" [DEV EMAIL SENDER] RECOVERY CODES REGENERATED NOTIFICATION");
+        System.out.println(" Recipient: " + recipientEmail);
+        System.out.println("==================================================");
+    }
 }
+

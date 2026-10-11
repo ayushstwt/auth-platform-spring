@@ -30,6 +30,13 @@ public enum ErrorMessages {
     E025(HttpStatus.CONFLICT, "This Google account is already linked to another user"),
     E026(HttpStatus.FORBIDDEN, "Hosted domain unauthorized"),
     E027(HttpStatus.UNAUTHORIZED, "OAuth exchange code is invalid, already used, or expired"),
+    E028(HttpStatus.UNAUTHORIZED, "MFA token is invalid, expired, or maximum attempts reached"),
+    E029(HttpStatus.UNAUTHORIZED, "Invalid MFA code or recovery code"),
+    E030(HttpStatus.FORBIDDEN, "Requested MFA factor is not configured or verified for this account"),
+    E031(HttpStatus.FORBIDDEN, "Step-up authentication required: recent MFA or login required for this operation"),
+    E032(HttpStatus.BAD_REQUEST, "MFA is already enabled on this account"),
+    E033(HttpStatus.BAD_REQUEST, "MFA is not enabled on this account"),
+    E034(HttpStatus.FORBIDDEN, "MFA is required for administrator accounts"),
     E500(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected internal error occurred");
 
     private final HttpStatus httpStatus;

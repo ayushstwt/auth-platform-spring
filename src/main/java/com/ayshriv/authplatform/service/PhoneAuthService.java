@@ -3,6 +3,7 @@ package com.ayshriv.authplatform.service;
 import com.ayshriv.authplatform.config.AppProperties;
 import com.ayshriv.authplatform.constants.ErrorMessages;
 import com.ayshriv.authplatform.dto.AuthResponse;
+import com.ayshriv.authplatform.dto.LoginResult;
 import com.ayshriv.authplatform.dto.PhoneLoginConfirmRequest;
 import com.ayshriv.authplatform.dto.PhoneLoginSendRequest;
 import com.ayshriv.authplatform.dto.PhoneOtpSendRequest;
@@ -48,6 +49,7 @@ public class PhoneAuthService {
     private final SmsAbuseProtectionService smsAbuseProtectionService;
     private final JwtTokenService jwtTokenService;
     private final AuditService auditService;
+    private final AuthenticationResultService authenticationResultService;
     private final AppProperties appProperties;
 
     public PhoneAuthService(UserRepository userRepository,
@@ -57,6 +59,7 @@ public class PhoneAuthService {
                             SmsAbuseProtectionService smsAbuseProtectionService,
                             JwtTokenService jwtTokenService,
                             AuditService auditService,
+                            AuthenticationResultService authenticationResultService,
                             AppProperties appProperties) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -65,8 +68,10 @@ public class PhoneAuthService {
         this.smsAbuseProtectionService = smsAbuseProtectionService;
         this.jwtTokenService = jwtTokenService;
         this.auditService = auditService;
+        this.authenticationResultService = authenticationResultService;
         this.appProperties = appProperties;
     }
+
 
     @Transactional
     public void sendPhoneVerificationOtp(Long userId, PhoneOtpSendRequest request, String requestIp) {
@@ -185,7 +190,7 @@ public class PhoneAuthService {
     }
 
     @Transactional
-    public AuthResponse confirmPhoneLoginOtp(PhoneLoginConfirmRequest request, String requestIp, String userAgent) {
+    public LoginResult confirmPhoneLoginOtp(PhoneLoginConfirmRequest request, String requestIp, String userAgent) {
         String normalizedPhone = PhoneNumberValidationUtils.normalizeToE164(
                 request.phoneNumber(),
                 appProperties.sms().defaultRegion()
@@ -207,23 +212,7 @@ public class PhoneAuthService {
         user.setLastLoginAt(Instant.now());
         userRepository.save(user);
 
-        String accessToken = jwtTokenService.generateAccessToken(user);
-        String rawRefreshToken = TokenHashUtils.generateSecureToken();
-        String refreshTokenHash = TokenHashUtils.hashToken(rawRefreshToken);
-        String familyId = UUID.randomUUID().toString();
-        Instant expiresAt = Instant.now().plus(Duration.ofDays(appProperties.security().jwt().refreshTokenExpiryDays()));
-
-        RefreshToken refreshToken = new RefreshToken(user, refreshTokenHash, familyId, expiresAt, requestIp, userAgent);
-        refreshTokenRepository.save(refreshToken);
-
-        auditService.recordActivity(user.getId(), LogAction.LOGIN, LogSubAction.SUCCESS);
-        log.info("Phone OTP Login successful for user id={}", user.getId());
-
-        return AuthResponse.of(
-                accessToken,
-                rawRefreshToken,
-                jwtTokenService.getAccessTokenExpirySeconds(),
-                UserResponse.from(user)
-        );
+        return authenticationResultService.processAuthentication(user, "phone_otp", LogAction.LOGIN, requestIp, userAgent);
     }
 }
+

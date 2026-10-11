@@ -71,11 +71,11 @@ class AdminControllerIntegrationTest {
         adminUser.setStatus(UserStatus.ACTIVE);
         adminUser.setRoles(Set.of(roleUser, roleAdmin));
         adminUser = userRepository.save(adminUser);
-        this.adminToken = jwtTokenService.generateAccessToken(adminUser);
+        this.adminToken = jwtTokenService.generateAccessToken(adminUser, java.util.List.of("pwd", "mfa_totp"), java.time.Instant.now());
     }
 
     @Test
-    @DisplayName("Admin user should be able to list users via /api/v1/admin/users")
+    @DisplayName("Admin user with MFA satisfied token should be able to list users via /api/v1/admin/users")
     void adminCanAccessAdminEndpoint() throws Exception {
         mockMvc.perform(get("/api/v1/admin/users")
                         .header("Authorization", "Bearer " + adminToken))
@@ -83,6 +83,19 @@ class AdminControllerIntegrationTest {
                 .andExpect(jsonPath("$.status", is("success")))
                 .andExpect(jsonPath("$.data", org.hamcrest.Matchers.hasSize(greaterThanOrEqualTo(2))))
                 .andExpect(jsonPath("$.metadata.totalItems", greaterThanOrEqualTo(2)));
+    }
+
+    @Test
+    @DisplayName("Admin user without MFA token should receive 403 Forbidden with E034")
+    void adminWithoutMfaDeniedAdminEndpoint() throws Exception {
+        User admin = userRepository.findByEmail("admin@example.com").orElseThrow();
+        String nonMfaAdminToken = jwtTokenService.generateAccessToken(admin, java.util.List.of("pwd"), java.time.Instant.now());
+
+        mockMvc.perform(get("/api/v1/admin/users")
+                        .header("Authorization", "Bearer " + nonMfaAdminToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status", is("error")))
+                .andExpect(jsonPath("$.errorCode", is("E034")));
     }
 
     @Test
@@ -96,3 +109,4 @@ class AdminControllerIntegrationTest {
                 .andExpect(jsonPath("$.message", is("Access denied")));
     }
 }
+

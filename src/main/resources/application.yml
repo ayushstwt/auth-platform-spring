@@ -116,3 +116,14 @@ app:
     redirect-success-url: ${GOOGLE_REDIRECT_SUCCESS_URL:http://localhost:3000/oauth2/callback}
     exchange-code-ttl-seconds: ${GOOGLE_EXCHANGE_CODE_TTL_SECONDS:60}
     jwks-uri: ${GOOGLE_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}
+  mfa:
+    current-key-id: ${MFA_CURRENT_KEY_ID:k1}
+    encryption-keys:
+      k1: ${MFA_ENCRYPTION_KEY_K1:MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=}
+    token-ttl-minutes: ${MFA_TOKEN_TTL_MINUTES:5}
+
+    max-attempts: ${MFA_MAX_ATTEMPTS:5}
+    step-up-validity-minutes: ${MFA_STEP_UP_VALIDITY_MINUTES:10}
+    enforce-for-admin: ${MFA_ENFORCE_FOR_ADMIN:true}
+    issuer: ${MFA_ISSUER:Ayshriv Auth}
+

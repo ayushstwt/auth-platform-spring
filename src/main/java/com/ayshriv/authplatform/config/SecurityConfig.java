@@ -90,6 +90,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/google/exchange",
                                 "/api/v1/auth/password/forgot",
                                 "/api/v1/auth/password/reset",
+                                "/api/v1/auth/mfa/**",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",
                                 "/v3/api-docs/**",
@@ -98,6 +99,7 @@ public class SecurityConfig {
                                 "/api/v1/health"
                         ).permitAll()
                         .anyRequest().authenticated()
+
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt

@@ -91,3 +91,15 @@ app:
     redirect-success-url: http://localhost:3000/oauth2/callback
     exchange-code-ttl-seconds: 60
     jwks-uri: https://www.googleapis.com/oauth2/v3/certs
+  mfa:
+    current-key-id: k1
+    encryption-keys:
+      k1: MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=
+      k2: YWJjZGVmYWJjZGVmYWJjZGVmYWJjZGVmYWJjZGVmYWI=
+    token-ttl-minutes: 5
+    max-attempts: 5
+
+    step-up-validity-minutes: 10
+    enforce-for-admin: true
+    issuer: Ayshriv Auth Test
+

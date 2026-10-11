@@ -1,0 +1,9 @@
+Hello [(${name})],
+
+A new set of emergency recovery codes was generated for your two-factor authentication.
+All previously generated recovery codes are now permanently invalidated.
+
+If you did not authorize this change, please sign in immediately and review your account security.
+
+--
+Ayshriv Auth Platform

@@ -341,3 +341,102 @@ curl -X DELETE http://localhost:8080/api/v1/users/me/identities/google \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
+---
+
+## 8. Multi-Factor Authentication (Phase 6)
+
+Full MFA architecture, RFC 6238 vectors, encryption model, and policy documentation are in [docs/mfa-design.md](file:///C:/Users/Dell/OneDrive/Documents/ayshriv-workspace/auth-platform-spring/docs/mfa-design.md).
+
+### Generating Encryption Key
+Generate a 32-byte Base64 key for AES-256-GCM secret encryption:
+```bash
+openssl rand -base64 32
+```
+Set this value in `MFA_ENCRYPTION_KEY_K1` and specify `MFA_CURRENT_KEY_ID=k1`.
+
+### 22. Initiate TOTP Setup (Authenticated, Requires Recent Auth)
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/mfa/totp/setup \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+Returns:
+```json
+{
+  "status": "success",
+  "data": {
+    "secret": "JBSWY3DPEHPK3PXP",
+    "otpauthUri": "otpauth://totp/Ayshriv%20Auth:user%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Ayshriv%20Auth&algorithm=SHA1&digits=6&period=30"
+  }
+}
+```
+
+### 23. Confirm TOTP Setup (Enables MFA and issues 10 Recovery Codes)
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/mfa/totp/confirm \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "123456"
+  }'
+```
+
+### 24. Login Step 1 (MFA Enabled Returns 200 with mfaToken)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "Password123!"
+  }'
+```
+Returns:
+```json
+{
+  "status": "success",
+  "message": "MFA verification required",
+  "data": {
+    "mfaRequired": true,
+    "mfaToken": "<INTERMEDIATE_MFA_TOKEN>",
+    "availableFactors": ["TOTP", "EMAIL", "SMS", "RECOVERY_CODE"]
+  }
+}
+```
+
+### 25. Login Step 2: Verify MFA Factor (Obtain Final Access & Refresh Tokens)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/mfa/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mfaToken": "<INTERMEDIATE_MFA_TOKEN>",
+    "factor": "TOTP",
+    "code": "123456"
+  }'
+```
+
+### 26. Request Fallback MFA Code (via Verified Email or SMS)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/mfa/challenge/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mfaToken": "<INTERMEDIATE_MFA_TOKEN>",
+    "channel": "EMAIL"
+  }'
+```
+
+### 27. Regenerate Emergency Recovery Codes
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/mfa/recovery-codes/regenerate \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+### 28. Disable MFA
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/mfa/disable \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "password": "Password123!"
+  }'
+```
+
+

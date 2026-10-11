@@ -65,16 +65,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Authenticate with email and password to obtain tokens")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(
+    @Operation(summary = "Authenticate with email and password to obtain tokens or MFA challenge")
+    public ResponseEntity<ApiResponse<com.ayshriv.authplatform.dto.LoginResult>> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest servletRequest) {
-        AuthResponse response = authService.login(
+        com.ayshriv.authplatform.dto.LoginResult response = authService.login(
                 request,
                 servletRequest.getRemoteAddr(),
                 servletRequest.getHeader("User-Agent")
         );
-        return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
+        String msg = response.mfaRequired() ? "MFA verification required" : "Authentication successful";
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 
     @PostMapping("/refresh")
@@ -135,16 +136,17 @@ public class AuthController {
     }
 
     @PostMapping("/login/email-otp/confirm")
-    @Operation(summary = "Confirm one-time login code and obtain JWT authentication tokens")
-    public ResponseEntity<ApiResponse<AuthResponse>> confirmLoginOtp(
+    @Operation(summary = "Confirm one-time login code and obtain JWT authentication tokens or MFA challenge")
+    public ResponseEntity<ApiResponse<com.ayshriv.authplatform.dto.LoginResult>> confirmLoginOtp(
             @Valid @RequestBody EmailOtpConfirmRequest request,
             HttpServletRequest servletRequest) {
-        AuthResponse response = emailAuthService.confirmLoginOtp(
+        com.ayshriv.authplatform.dto.LoginResult response = emailAuthService.confirmLoginOtp(
                 request,
                 servletRequest.getRemoteAddr(),
                 servletRequest.getHeader("User-Agent")
         );
-        return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
+        String msg = response.mfaRequired() ? "MFA verification required" : "Authentication successful";
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 
     @PostMapping("/password/forgot")
@@ -175,41 +177,45 @@ public class AuthController {
     }
 
     @PostMapping("/login/phone-otp/confirm")
-    @Operation(summary = "Confirm one-time login SMS code and obtain JWT authentication tokens")
-    public ResponseEntity<ApiResponse<AuthResponse>> confirmPhoneLoginOtp(
+    @Operation(summary = "Confirm one-time login SMS code and obtain JWT authentication tokens or MFA challenge")
+    public ResponseEntity<ApiResponse<com.ayshriv.authplatform.dto.LoginResult>> confirmPhoneLoginOtp(
             @Valid @RequestBody com.ayshriv.authplatform.dto.PhoneLoginConfirmRequest request,
             HttpServletRequest servletRequest) {
-        AuthResponse response = phoneAuthService.confirmPhoneLoginOtp(
+        com.ayshriv.authplatform.dto.LoginResult response = phoneAuthService.confirmPhoneLoginOtp(
                 request,
                 servletRequest.getRemoteAddr(),
                 servletRequest.getHeader("User-Agent")
         );
-        return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
+        String msg = response.mfaRequired() ? "MFA verification required" : "Authentication successful";
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 
     @PostMapping("/google")
     @Operation(summary = "Sign in or sign up using verified Google OIDC ID token")
-    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(
+    public ResponseEntity<ApiResponse<com.ayshriv.authplatform.dto.LoginResult>> googleLogin(
             @Valid @RequestBody com.ayshriv.authplatform.dto.GoogleTokenLoginRequest request,
             HttpServletRequest servletRequest) {
-        AuthResponse response = googleAuthService.loginWithIdToken(
+        com.ayshriv.authplatform.dto.LoginResult response = googleAuthService.loginWithIdToken(
                 request.idToken(),
                 servletRequest.getRemoteAddr(),
                 servletRequest.getHeader("User-Agent")
         );
-        return ResponseEntity.ok(ApiResponse.success("Google authentication successful", response));
+        String msg = response.mfaRequired() ? "MFA verification required" : "Google authentication successful";
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 
     @PostMapping("/google/exchange")
     @Operation(summary = "Exchange one-time authorization code for JWT authentication tokens")
-    public ResponseEntity<ApiResponse<AuthResponse>> googleExchange(
+    public ResponseEntity<ApiResponse<com.ayshriv.authplatform.dto.LoginResult>> googleExchange(
             @Valid @RequestBody com.ayshriv.authplatform.dto.GoogleExchangeRequest request,
             HttpServletRequest servletRequest) {
-        AuthResponse response = googleAuthService.exchangeCode(
+        com.ayshriv.authplatform.dto.LoginResult response = googleAuthService.exchangeCode(
                 request.exchangeCode(),
                 servletRequest.getRemoteAddr(),
                 servletRequest.getHeader("User-Agent")
         );
-        return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
+        String msg = response.mfaRequired() ? "MFA verification required" : "Authentication successful";
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 }
+
