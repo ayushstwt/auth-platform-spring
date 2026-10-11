@@ -76,6 +76,31 @@
             <version>7.10.1</version>
         </dependency>
 
+        <!-- Phone Number Parsing & Validation (Google libphonenumber) -->
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>9.0.40</version>
+        </dependency>
+
+        <!-- Resilience4j (Circuit Breaker & Retry with AOP) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+
+        <!-- Twilio SDK for Real SMS Delivery -->
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>13.0.2</version>
+        </dependency>
+
         <!-- Database & Migrations -->
         <dependency>
             <groupId>org.postgresql</groupId>

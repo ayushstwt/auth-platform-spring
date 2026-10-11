@@ -30,6 +30,21 @@ public class Bucket4jRateLimiter implements RateLimiter {
             return Bucket.builder()
                     .addLimit(Bandwidth.builder().capacity(30).refillGreedy(30, Duration.ofMinutes(1)).build())
                     .build();
+        } else if (key.startsWith("sms:ip:")) {
+            // SMS IP limit: 20 requests per hour
+            return Bucket.builder()
+                    .addLimit(Bandwidth.builder().capacity(20).refillGreedy(20, Duration.ofHours(1)).build())
+                    .build();
+        } else if (key.startsWith("sms:user:")) {
+            // SMS user limit: 5 requests per hour
+            return Bucket.builder()
+                    .addLimit(Bandwidth.builder().capacity(5).refillGreedy(5, Duration.ofHours(1)).build())
+                    .build();
+        } else if (key.equals("sms:global")) {
+            // SMS global hourly cap: 100 per hour
+            return Bucket.builder()
+                    .addLimit(Bandwidth.builder().capacity(100).refillGreedy(100, Duration.ofHours(1)).build())
+                    .build();
         } else if (key.startsWith("dest:")) {
             // Destination rate limit: 5 requests per hour (aligned with maxSendsPerHour)
             return Bucket.builder()

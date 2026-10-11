@@ -15,6 +15,7 @@ import com.ayshriv.authplatform.dto.VerifyEmailConfirmRequest;
 import com.ayshriv.authplatform.security.SecurityUtils;
 import com.ayshriv.authplatform.service.AuthService;
 import com.ayshriv.authplatform.service.EmailAuthService;
+import com.ayshriv.authplatform.service.PhoneAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,10 +36,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final EmailAuthService emailAuthService;
+    private final PhoneAuthService phoneAuthService;
 
-    public AuthController(AuthService authService, EmailAuthService emailAuthService) {
+    public AuthController(AuthService authService,
+                          EmailAuthService emailAuthService,
+                          PhoneAuthService phoneAuthService) {
         this.authService = authService;
         this.emailAuthService = emailAuthService;
+        this.phoneAuthService = phoneAuthService;
     }
 
     @PostMapping("/register")
@@ -155,5 +160,27 @@ public class AuthController {
             HttpServletRequest servletRequest) {
         emailAuthService.resetPassword(request, servletRequest.getRemoteAddr());
         return ResponseEntity.ok(ApiResponse.success("Password reset successfully. Please log in with your new password", null));
+    }
+
+    @PostMapping("/login/phone-otp/send")
+    @Operation(summary = "Request one-time login code via SMS")
+    public ResponseEntity<ApiResponse<Void>> sendPhoneLoginOtp(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.PhoneLoginSendRequest request,
+            HttpServletRequest servletRequest) {
+        phoneAuthService.sendLoginPhoneOtp(request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("If the account exists and phone is verified, a one-time passcode has been sent", null));
+    }
+
+    @PostMapping("/login/phone-otp/confirm")
+    @Operation(summary = "Confirm one-time login SMS code and obtain JWT authentication tokens")
+    public ResponseEntity<ApiResponse<AuthResponse>> confirmPhoneLoginOtp(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.PhoneLoginConfirmRequest request,
+            HttpServletRequest servletRequest) {
+        AuthResponse response = phoneAuthService.confirmPhoneLoginOtp(
+                request,
+                servletRequest.getRemoteAddr(),
+                servletRequest.getHeader("User-Agent")
+        );
+        return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
     }
 }

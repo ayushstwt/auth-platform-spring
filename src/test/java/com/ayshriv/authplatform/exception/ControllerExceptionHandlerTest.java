@@ -86,9 +86,13 @@ class ControllerExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
+        org.springframework.http.converter.json.MappingJackson2HttpMessageConverter jacksonMessageConverter =
+                new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter(objectMapper);
+
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new DummyErrorController())
                 .setControllerAdvice(new ControllerExceptionHandler())
+                .setMessageConverters(jacksonMessageConverter)
                 .build();
     }
 

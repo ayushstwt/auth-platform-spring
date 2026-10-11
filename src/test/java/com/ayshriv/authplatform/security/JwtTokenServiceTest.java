@@ -34,11 +34,13 @@ class JwtTokenServiceTest {
                 "",
                 ""
         );
-        AppProperties.AuthProperties authProps = new AppProperties.AuthProperties(5, 15, false);
+        AppProperties.AuthProperties authProps = new AppProperties.AuthProperties(5, 15, false, 10);
         AppProperties.SecurityProperties secProps = new AppProperties.SecurityProperties(corsProps, jwtProps, authProps);
         AppProperties.OtpProperties otpProps = new AppProperties.OtpProperties("test-pepper", 5, 5, 60, 5);
         AppProperties.EmailProperties emailProps = new AppProperties.EmailProperties("test@ayshriv.com", "Test Auth");
-        AppProperties appProperties = new AppProperties(secProps, otpProps, emailProps);
+        AppProperties.TwilioProperties twilioProps = new AppProperties.TwilioProperties("sid", "token", "+1234567890");
+        AppProperties.SmsProperties smsProps = new AppProperties.SmsProperties("logging", "IN", List.of("IN", "US"), List.of("+1900"), 5, 20, 5, 100, 50, twilioProps);
+        AppProperties appProperties = new AppProperties(secProps, otpProps, emailProps, smsProps);
 
         RsaKeyProvider rsaKeyProvider = new RsaKeyProvider(appProperties);
         rsaKeyProvider.init();

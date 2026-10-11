@@ -57,12 +57,14 @@ class OtpServiceTest {
         AppProperties.JwtProperties jwt = new AppProperties.JwtProperties(
                 "issuer", "aud", 15, 7, "", ""
         );
-        AppProperties.AuthProperties auth = new AppProperties.AuthProperties(5, 15, false);
+        AppProperties.AuthProperties auth = new AppProperties.AuthProperties(5, 15, false, 10);
         AppProperties.SecurityProperties sec = new AppProperties.SecurityProperties(cors, jwt, auth);
         AppProperties.OtpProperties otp = new AppProperties.OtpProperties(PEPPER, 5, 5, 60, 5);
         AppProperties.EmailProperties email = new AppProperties.EmailProperties("no-reply@ayshriv.com", "Ayshriv");
+        AppProperties.TwilioProperties twilio = new AppProperties.TwilioProperties("sid", "token", "+1234567890");
+        AppProperties.SmsProperties sms = new AppProperties.SmsProperties("logging", "IN", List.of("IN", "US"), List.of("+1900"), 5, 20, 5, 100, 50, twilio);
 
-        appProperties = new AppProperties(sec, otp, email);
+        appProperties = new AppProperties(sec, otp, email, sms);
         otpService = new OtpService(otpChallengeRepository, rateLimiter, auditService, appProperties);
     }
 

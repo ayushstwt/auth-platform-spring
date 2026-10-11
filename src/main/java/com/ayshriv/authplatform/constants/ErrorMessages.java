@@ -20,6 +20,10 @@ public enum ErrorMessages {
     E015(HttpStatus.BAD_REQUEST, "Verification code is invalid or has expired"),
     E016(HttpStatus.TOO_MANY_REQUESTS, "Too many requests. Please wait before trying again"),
     E017(HttpStatus.BAD_REQUEST, "Maximum attempts reached. Please request a new code"),
+    E018(HttpStatus.BAD_REQUEST, "Invalid phone number format. Must be a valid E.164 phone number"),
+    E019(HttpStatus.FORBIDDEN, "SMS delivery to this country or destination is not permitted"),
+    E020(HttpStatus.UNAUTHORIZED, "Recent re-authentication is required to change a verified phone number"),
+    E021(HttpStatus.TOO_MANY_REQUESTS, "Daily SMS quota exceeded. Please contact support"),
     E500(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected internal error occurred");
 
     private final HttpStatus httpStatus;

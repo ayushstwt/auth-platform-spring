@@ -49,6 +49,7 @@ app:
       max-failed-attempts: 5
       lockout-duration-minutes: 15
       require-verified-email-before-login: false
+      reauth-validity-minutes: 10
   otp:
     pepper: test-pepper-secret-key-for-unit-and-integration-tests!
     ttl-minutes: 5
@@ -58,3 +59,17 @@ app:
   email:
     from-address: test@ayshriv.com
     from-name: Ayshriv Test Auth
+  sms:
+    provider: logging
+    default-region: IN
+    allowed-country-codes: IN,US,GB
+    blocked-prefixes: +1900,+1976
+    max-sends-per-hour-per-phone: 5
+    max-sends-per-hour-per-ip: 20
+    max-sends-per-hour-per-user: 5
+    global-hourly-cap: 100
+    daily-cost-guard-limit: 50
+    twilio:
+      account-sid: ACtest1234567890
+      auth-token: authtokentest
+      from-phone-number: +15005550006

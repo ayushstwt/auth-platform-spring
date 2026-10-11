@@ -73,6 +73,7 @@ app:
       max-failed-attempts: ${AUTH_MAX_FAILED_ATTEMPTS:5}
       lockout-duration-minutes: ${AUTH_LOCKOUT_DURATION_MINUTES:15}
       require-verified-email-before-login: ${AUTH_REQUIRE_VERIFIED_EMAIL:false}
+      reauth-validity-minutes: ${AUTH_REAUTH_VALIDITY_MINUTES:10}
   otp:
     pepper: ${OTP_PEPPER:default-otp-secret-pepper-change-in-production-min-32-bytes!}
     ttl-minutes: ${OTP_TTL_MINUTES:5}
@@ -82,3 +83,17 @@ app:
   email:
     from-address: ${EMAIL_FROM_ADDRESS:noreply@ayshriv.com}
     from-name: ${EMAIL_FROM_NAME:Ayshriv Auth}
+  sms:
+    provider: ${SMS_PROVIDER:logging}
+    default-region: ${SMS_DEFAULT_REGION:IN}
+    allowed-country-codes: ${SMS_ALLOWED_COUNTRY_CODES:IN,US,GB}
+    blocked-prefixes: ${SMS_BLOCKED_PREFIXES:+1900,+1976,+4490}
+    max-sends-per-hour-per-phone: ${SMS_MAX_SENDS_PER_HOUR_PHONE:5}
+    max-sends-per-hour-per-ip: ${SMS_MAX_SENDS_PER_HOUR_IP:20}
+    max-sends-per-hour-per-user: ${SMS_MAX_SENDS_PER_HOUR_USER:5}
+    global-hourly-cap: ${SMS_GLOBAL_HOURLY_CAP:100}
+    daily-cost-guard-limit: ${SMS_DAILY_COST_GUARD_LIMIT:500}
+    twilio:
+      account-sid: ${TWILIO_ACCOUNT_SID:}
+      authToken: ${TWILIO_AUTH_TOKEN:}
+      from-phone-number: ${TWILIO_FROM_PHONE_NUMBER:}

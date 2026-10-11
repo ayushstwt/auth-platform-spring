@@ -12,7 +12,8 @@ import java.util.List;
 public record AppProperties(
         @NotNull SecurityProperties security,
         @NotNull OtpProperties otp,
-        @NotNull EmailProperties email
+        @NotNull EmailProperties email,
+        @NotNull SmsProperties sms
 ) {
     public record SecurityProperties(
             @NotNull CorsProperties cors,
@@ -43,7 +44,8 @@ public record AppProperties(
     public record AuthProperties(
             int maxFailedAttempts,
             long lockoutDurationMinutes,
-            boolean requireVerifiedEmailBeforeLogin
+            boolean requireVerifiedEmailBeforeLogin,
+            long reauthValidityMinutes
     ) {
     }
 
@@ -59,6 +61,27 @@ public record AppProperties(
     public record EmailProperties(
             @NotEmpty String fromAddress,
             @NotEmpty String fromName
+    ) {
+    }
+
+    public record SmsProperties(
+            @NotEmpty String provider,
+            @NotEmpty String defaultRegion,
+            @NotEmpty List<String> allowedCountryCodes,
+            @NotNull List<String> blockedPrefixes,
+            int maxSendsPerHourPerPhone,
+            int maxSendsPerHourPerIp,
+            int maxSendsPerHourPerUser,
+            int globalHourlyCap,
+            int dailyCostGuardLimit,
+            @NotNull TwilioProperties twilio
+    ) {
+    }
+
+    public record TwilioProperties(
+            String accountSid,
+            String authToken,
+            String fromPhoneNumber
     ) {
     }
 }

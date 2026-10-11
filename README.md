@@ -137,7 +137,7 @@ Every HTTP request is assigned or preserves a unique `X-Request-Id` correlation 
 - [x] **Phase 1: Foundation** (`feature/01-foundation` -> `v0.1.0`)
 - [x] **Phase 2: Basic Auth** (`feature/02-basic-auth` -> `v0.2.0`)
 - [x] **Phase 3: Email OTP** (`feature/03-email-otp` -> `v0.3.0`)
-- [ ] **Phase 4: Phone OTP** (`feature/04-phone-otp` -> `v0.4.0`)
+- [x] **Phase 4: Phone OTP** (`feature/04-phone-otp` -> `v0.4.0`)
 - [ ] **Phase 5: Google OAuth** (`feature/05-google-oauth` -> `v0.5.0`)
 - [ ] **Phase 6: MFA** (`feature/06-mfa` -> `v0.6.0`)
 - [ ] **Phase 7: Hardening** (`feature/07-hardening` -> `v0.7.0`)
@@ -214,7 +214,47 @@ curl -X POST http://localhost:8080/api/v1/auth/password/reset \
   }'
 ```
 
-### 8. Login (Password)
+### 8. Add/Change User Phone (Request SMS OTP)
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/phone/send-otp \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phoneNumber": "+919876543210"
+  }'
+```
+
+### 9. Confirm & Verify User Phone
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/phone/verify \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phoneNumber": "+919876543210",
+    "code": "123456"
+  }'
+```
+
+### 10. Login with Phone OTP (Send)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login/phone-otp/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phoneNumber": "+919876543210"
+  }'
+```
+
+### 11. Login with Phone OTP (Confirm)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login/phone-otp/confirm \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phoneNumber": "+919876543210",
+    "code": "123456"
+  }'
+```
+
+### 12. Login (Password)
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -224,7 +264,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   }'
 ```
 
-### 9. Rotate Refresh Token
+### 13. Rotate Refresh Token
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
@@ -233,13 +273,13 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
   }'
 ```
 
-### 10. Get Current User Profile
+### 14. Get Current User Profile
 ```bash
 curl -X GET http://localhost:8080/api/v1/users/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-### 11. Change Password
+### 15. Change Password
 ```bash
 curl -X POST http://localhost:8080/api/v1/users/me/change-password \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
@@ -250,7 +290,7 @@ curl -X POST http://localhost:8080/api/v1/users/me/change-password \
   }'
 ```
 
-### 12. Public JWKS Key Set
+### 16. Public JWKS Key Set
 ```bash
 curl -X GET http://localhost:8080/.well-known/jwks.json
 ```

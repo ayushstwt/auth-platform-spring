@@ -5,6 +5,7 @@ import com.ayshriv.authplatform.dto.ChangePasswordRequest;
 import com.ayshriv.authplatform.dto.UpdateUserRequest;
 import com.ayshriv.authplatform.dto.UserResponse;
 import com.ayshriv.authplatform.security.SecurityUtils;
+import com.ayshriv.authplatform.service.PhoneAuthService;
 import com.ayshriv.authplatform.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final PhoneAuthService phoneAuthService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PhoneAuthService phoneAuthService) {
         this.userService = userService;
+        this.phoneAuthService = phoneAuthService;
     }
 
     @GetMapping("/me")
@@ -50,5 +53,25 @@ public class UserController {
         Long userId = SecurityUtils.getAuthenticatedUserId();
         userService.changePassword(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
+    }
+
+    @PostMapping("/me/phone/send-otp")
+    @Operation(summary = "Send OTP to add or update phone number (requires recent login if phone already verified)")
+    public ResponseEntity<ApiResponse<Void>> sendPhoneOtp(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.PhoneOtpSendRequest request,
+            jakarta.servlet.http.HttpServletRequest servletRequest) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        phoneAuthService.sendPhoneVerificationOtp(userId, request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Verification code sent to phone number", null));
+    }
+
+    @PostMapping("/me/phone/verify")
+    @Operation(summary = "Verify phone number using SMS OTP code")
+    public ResponseEntity<ApiResponse<UserResponse>> verifyPhone(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.PhoneVerifyRequest request,
+            jakarta.servlet.http.HttpServletRequest servletRequest) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        UserResponse response = phoneAuthService.verifyUserPhone(userId, request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Phone number verified successfully", response));
     }
 }

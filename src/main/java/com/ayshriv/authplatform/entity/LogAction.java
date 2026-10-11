@@ -8,6 +8,8 @@ public enum LogAction {
     PASSWORD_CHANGE,
     EMAIL_VERIFY,
     PHONE_VERIFY,
+    PHONE_ADD,
+    PHONE_CHANGE,
     OTP_REQUEST,
     OTP_VERIFY,
     OAUTH_LOGIN,

@@ -17,9 +17,11 @@ class LogMaskingUtilsTest {
     }
 
     @Test
-    @DisplayName("Should mask phone numbers safely")
+    @DisplayName("Should mask phone numbers safely preserving country code prefix")
     void shouldMaskPhones() {
-        assertThat(LogMaskingUtils.maskPhone("+1-555-123-4567")).isEqualTo("*******4567");
+        assertThat(LogMaskingUtils.maskPhone("+919876541234")).isEqualTo("+91******1234");
+        assertThat(LogMaskingUtils.maskPhone("+15551234567")).isEqualTo("+15******4567");
+        assertThat(LogMaskingUtils.maskPhone("9876543210")).isEqualTo("*******3210");
         assertThat(LogMaskingUtils.maskPhone("123")).isEqualTo("****");
         assertThat(LogMaskingUtils.maskPhone("")).isEqualTo("[EMPTY]");
         assertThat(LogMaskingUtils.maskPhone(null)).isEqualTo("[EMPTY]");

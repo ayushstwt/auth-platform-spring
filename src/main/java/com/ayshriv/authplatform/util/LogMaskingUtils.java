@@ -34,6 +34,11 @@ public final class LogMaskingUtils {
         if (cleaned.length() <= 4) {
             return "****";
         }
+        if (cleaned.startsWith("+") && cleaned.length() > 6) {
+            String prefix = cleaned.substring(0, 3); // e.g. +91
+            String suffix = cleaned.substring(cleaned.length() - 4);
+            return prefix + "******" + suffix;
+        }
         return "*******" + cleaned.substring(cleaned.length() - 4);
     }
 

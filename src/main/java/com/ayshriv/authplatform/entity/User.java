@@ -43,6 +43,13 @@ public class User extends BaseEntity {
     @Column(name = "EMAIL_VERIFIED", nullable = false)
     private boolean emailVerified = false;
 
+    @Column(name = "PHONE_E164", length = 20, unique = true)
+    private String phoneE164;
+
+    @Basic(optional = false)
+    @Column(name = "PHONE_VERIFIED", nullable = false)
+    private boolean phoneVerified = false;
+
     @Enumerated(EnumType.STRING)
     @Basic(optional = false)
     @Column(name = "STATUS", nullable = false, length = 20)
@@ -115,6 +122,22 @@ public class User extends BaseEntity {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public String getPhoneE164() {
+        return phoneE164;
+    }
+
+    public void setPhoneE164(String phoneE164) {
+        this.phoneE164 = phoneE164;
+    }
+
+    public boolean isPhoneVerified() {
+        return phoneVerified;
+    }
+
+    public void setPhoneVerified(boolean phoneVerified) {
+        this.phoneVerified = phoneVerified;
     }
 
     public UserStatus getStatus() {

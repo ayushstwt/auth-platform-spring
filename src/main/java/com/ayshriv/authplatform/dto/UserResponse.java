@@ -14,6 +14,8 @@ public record UserResponse(
         String firstName,
         String lastName,
         boolean emailVerified,
+        String phoneE164,
+        boolean phoneVerified,
         UserStatus status,
         Set<String> roles,
         Instant createdOn
@@ -29,6 +31,8 @@ public record UserResponse(
                 user.getFirstName(),
                 user.getLastName(),
                 user.isEmailVerified(),
+                user.getPhoneE164(),
+                user.isPhoneVerified(),
                 user.getStatus(),
                 roleNames,
                 user.getCreatedOn()
