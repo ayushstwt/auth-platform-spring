@@ -63,8 +63,9 @@ class OtpServiceTest {
         AppProperties.EmailProperties email = new AppProperties.EmailProperties("no-reply@ayshriv.com", "Ayshriv");
         AppProperties.TwilioProperties twilio = new AppProperties.TwilioProperties("sid", "token", "+1234567890");
         AppProperties.SmsProperties sms = new AppProperties.SmsProperties("logging", "IN", List.of("IN", "US"), List.of("+1900"), 5, 20, 5, 100, 50, twilio);
+        AppProperties.GoogleProperties google = new AppProperties.GoogleProperties(List.of("client-1"), null, false, "http://localhost:3000", 60, "https://www.googleapis.com/oauth2/v3/certs");
 
-        appProperties = new AppProperties(sec, otp, email, sms);
+        appProperties = new AppProperties(sec, otp, email, sms, google);
         otpService = new OtpService(otpChallengeRepository, rateLimiter, auditService, appProperties);
     }
 

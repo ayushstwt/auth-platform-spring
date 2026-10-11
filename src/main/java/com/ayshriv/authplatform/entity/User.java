@@ -50,6 +50,10 @@ public class User extends BaseEntity {
     @Column(name = "PHONE_VERIFIED", nullable = false)
     private boolean phoneVerified = false;
 
+    @Basic(optional = false)
+    @Column(name = "HAS_PASSWORD", nullable = false)
+    private boolean hasPassword = true;
+
     @Enumerated(EnumType.STRING)
     @Basic(optional = false)
     @Column(name = "STATUS", nullable = false, length = 20)
@@ -138,6 +142,14 @@ public class User extends BaseEntity {
 
     public void setPhoneVerified(boolean phoneVerified) {
         this.phoneVerified = phoneVerified;
+    }
+
+    public boolean isHasPassword() {
+        return hasPassword;
+    }
+
+    public void setHasPassword(boolean hasPassword) {
+        this.hasPassword = hasPassword;
     }
 
     public UserStatus getStatus() {

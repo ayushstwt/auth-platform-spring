@@ -40,17 +40,20 @@ public class SecurityConfig {
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final CorrelationIdFilter correlationIdFilter;
     private final RsaKeyProvider rsaKeyProvider;
+    private final com.ayshriv.authplatform.security.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     public SecurityConfig(AppProperties appProperties,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
                           CorrelationIdFilter correlationIdFilter,
-                          RsaKeyProvider rsaKeyProvider) {
+                          RsaKeyProvider rsaKeyProvider,
+                          com.ayshriv.authplatform.security.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
         this.appProperties = appProperties;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.correlationIdFilter = correlationIdFilter;
         this.rsaKeyProvider = rsaKeyProvider;
+        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
@@ -83,6 +86,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/login/email-otp/confirm",
                                 "/api/v1/auth/login/phone-otp/send",
                                 "/api/v1/auth/login/phone-otp/confirm",
+                                "/api/v1/auth/google",
+                                "/api/v1/auth/google/exchange",
                                 "/api/v1/auth/password/forgot",
                                 "/api/v1/auth/password/reset",
                                 "/api/v1/auth/refresh",
@@ -101,8 +106,15 @@ public class SecurityConfig {
                         )
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
-                )
-                .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class);
+                );
+
+        if (appProperties.google().redirectFlowEnabled()) {
+            http.oauth2Login(oauth2 -> oauth2
+                    .successHandler(oAuth2LoginSuccessHandler)
+            );
+        }
+
+        http.addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

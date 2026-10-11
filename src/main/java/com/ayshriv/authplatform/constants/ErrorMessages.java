@@ -24,6 +24,12 @@ public enum ErrorMessages {
     E019(HttpStatus.FORBIDDEN, "SMS delivery to this country or destination is not permitted"),
     E020(HttpStatus.UNAUTHORIZED, "Recent re-authentication is required to change a verified phone number"),
     E021(HttpStatus.TOO_MANY_REQUESTS, "Daily SMS quota exceeded. Please contact support"),
+    E022(HttpStatus.UNAUTHORIZED, "Invalid, unverified, or expired Google token"),
+    E023(HttpStatus.FORBIDDEN, "A local account exists with this email but is not verified. Please verify your email first"),
+    E024(HttpStatus.BAD_REQUEST, "Cannot unlink the last remaining login method"),
+    E025(HttpStatus.CONFLICT, "This Google account is already linked to another user"),
+    E026(HttpStatus.FORBIDDEN, "Hosted domain unauthorized"),
+    E027(HttpStatus.UNAUTHORIZED, "OAuth exchange code is invalid, already used, or expired"),
     E500(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected internal error occurred");
 
     private final HttpStatus httpStatus;

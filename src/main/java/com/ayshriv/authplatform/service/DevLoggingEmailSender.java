@@ -44,4 +44,15 @@ public class DevLoggingEmailSender implements EmailSender {
         System.out.println(" Code: " + otpCode);
         System.out.println("==================================================");
     }
+
+    @Override
+    public void sendAccountLinkedEmail(String recipientEmail, String recipientName, String provider) {
+        log.info("[DEV EMAIL] To: {} ({}) | Subject: Account Linked | Provider: {}",
+                LogMaskingUtils.maskEmail(recipientEmail), recipientName, provider);
+        System.out.println("==================================================");
+        System.out.println(" [DEV EMAIL SENDER] ACCOUNT LINKED NOTIFICATION");
+        System.out.println(" Recipient: " + recipientEmail);
+        System.out.println(" Provider: " + provider);
+        System.out.println("==================================================");
+    }
 }

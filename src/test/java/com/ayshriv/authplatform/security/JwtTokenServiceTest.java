@@ -40,7 +40,8 @@ class JwtTokenServiceTest {
         AppProperties.EmailProperties emailProps = new AppProperties.EmailProperties("test@ayshriv.com", "Test Auth");
         AppProperties.TwilioProperties twilioProps = new AppProperties.TwilioProperties("sid", "token", "+1234567890");
         AppProperties.SmsProperties smsProps = new AppProperties.SmsProperties("logging", "IN", List.of("IN", "US"), List.of("+1900"), 5, 20, 5, 100, 50, twilioProps);
-        AppProperties appProperties = new AppProperties(secProps, otpProps, emailProps, smsProps);
+        AppProperties.GoogleProperties googleProps = new AppProperties.GoogleProperties(List.of("client-1"), null, false, "http://localhost:3000", 60, "https://www.googleapis.com/oauth2/v3/certs");
+        AppProperties appProperties = new AppProperties(secProps, otpProps, emailProps, smsProps, googleProps);
 
         RsaKeyProvider rsaKeyProvider = new RsaKeyProvider(appProperties);
         rsaKeyProvider.init();

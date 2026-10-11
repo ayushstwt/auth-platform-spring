@@ -7,4 +7,6 @@ public interface EmailSender {
     void sendLoginOtpEmail(String recipientEmail, String recipientName, String otpCode);
 
     void sendPasswordResetEmail(String recipientEmail, String recipientName, String otpCode);
+
+    void sendAccountLinkedEmail(String recipientEmail, String recipientName, String provider);
 }

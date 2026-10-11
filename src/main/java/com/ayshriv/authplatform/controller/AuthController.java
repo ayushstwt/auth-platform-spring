@@ -37,13 +37,16 @@ public class AuthController {
     private final AuthService authService;
     private final EmailAuthService emailAuthService;
     private final PhoneAuthService phoneAuthService;
+    private final com.ayshriv.authplatform.service.GoogleAuthService googleAuthService;
 
     public AuthController(AuthService authService,
                           EmailAuthService emailAuthService,
-                          PhoneAuthService phoneAuthService) {
+                          PhoneAuthService phoneAuthService,
+                          com.ayshriv.authplatform.service.GoogleAuthService googleAuthService) {
         this.authService = authService;
         this.emailAuthService = emailAuthService;
         this.phoneAuthService = phoneAuthService;
+        this.googleAuthService = googleAuthService;
     }
 
     @PostMapping("/register")
@@ -178,6 +181,32 @@ public class AuthController {
             HttpServletRequest servletRequest) {
         AuthResponse response = phoneAuthService.confirmPhoneLoginOtp(
                 request,
+                servletRequest.getRemoteAddr(),
+                servletRequest.getHeader("User-Agent")
+        );
+        return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
+    }
+
+    @PostMapping("/google")
+    @Operation(summary = "Sign in or sign up using verified Google OIDC ID token")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.GoogleTokenLoginRequest request,
+            HttpServletRequest servletRequest) {
+        AuthResponse response = googleAuthService.loginWithIdToken(
+                request.idToken(),
+                servletRequest.getRemoteAddr(),
+                servletRequest.getHeader("User-Agent")
+        );
+        return ResponseEntity.ok(ApiResponse.success("Google authentication successful", response));
+    }
+
+    @PostMapping("/google/exchange")
+    @Operation(summary = "Exchange one-time authorization code for JWT authentication tokens")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleExchange(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.GoogleExchangeRequest request,
+            HttpServletRequest servletRequest) {
+        AuthResponse response = googleAuthService.exchangeCode(
+                request.exchangeCode(),
                 servletRequest.getRemoteAddr(),
                 servletRequest.getHeader("User-Agent")
         );

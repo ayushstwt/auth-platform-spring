@@ -13,7 +13,8 @@ public record AppProperties(
         @NotNull SecurityProperties security,
         @NotNull OtpProperties otp,
         @NotNull EmailProperties email,
-        @NotNull SmsProperties sms
+        @NotNull SmsProperties sms,
+        @NotNull GoogleProperties google
 ) {
     public record SecurityProperties(
             @NotNull CorsProperties cors,
@@ -82,6 +83,16 @@ public record AppProperties(
             String accountSid,
             String authToken,
             String fromPhoneNumber
+    ) {
+    }
+
+    public record GoogleProperties(
+            @NotNull List<String> clientIds,
+            String hostedDomain,
+            boolean redirectFlowEnabled,
+            @NotEmpty String redirectSuccessUrl,
+            long exchangeCodeTtlSeconds,
+            @NotEmpty String jwksUri
     ) {
     }
 }

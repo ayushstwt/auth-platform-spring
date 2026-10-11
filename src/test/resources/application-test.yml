@@ -16,6 +16,17 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-google-client-id
+            client-secret: test-google-client-secret
+            scope:
+              - openid
+              - profile
+              - email
 
 server:
   port: 0
@@ -73,3 +84,10 @@ app:
       account-sid: ACtest1234567890
       auth-token: authtokentest
       from-phone-number: +15005550006
+  google:
+    client-ids: test-google-client-id-1,test-google-client-id-2
+    hosted-domain: ""
+    redirect-flow-enabled: true
+    redirect-success-url: http://localhost:3000/oauth2/callback
+    exchange-code-ttl-seconds: 60
+    jwks-uri: https://www.googleapis.com/oauth2/v3/certs

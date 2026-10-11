@@ -23,6 +23,18 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID:dummy-google-client-id}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:dummy-google-client-secret}
+            scope:
+              - openid
+              - profile
+              - email
+
 server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
@@ -97,3 +109,10 @@ app:
       account-sid: ${TWILIO_ACCOUNT_SID:}
       authToken: ${TWILIO_AUTH_TOKEN:}
       from-phone-number: ${TWILIO_FROM_PHONE_NUMBER:}
+  google:
+    client-ids: ${GOOGLE_CLIENT_IDS:sample-google-client-id.apps.googleusercontent.com}
+    hosted-domain: ${GOOGLE_HOSTED_DOMAIN:}
+    redirect-flow-enabled: ${GOOGLE_REDIRECT_FLOW_ENABLED:false}
+    redirect-success-url: ${GOOGLE_REDIRECT_SUCCESS_URL:http://localhost:3000/oauth2/callback}
+    exchange-code-ttl-seconds: ${GOOGLE_EXCHANGE_CODE_TTL_SECONDS:60}
+    jwks-uri: ${GOOGLE_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}

@@ -77,6 +77,19 @@ public class SmtpEmailSender implements EmailSender {
         sendWithRetry(recipientEmail, "Reset your password", htmlBody, textBody);
     }
 
+    @Override
+    @Async("emailTaskExecutor")
+    public void sendAccountLinkedEmail(String recipientEmail, String recipientName, String provider) {
+        Context context = new Context();
+        context.setVariable("name", recipientName);
+        context.setVariable("provider", provider);
+
+        String htmlBody = templateEngine.process("mail/account-linked.html", context);
+        String textBody = templateEngine.process("mail/account-linked.txt", context);
+
+        sendWithRetry(recipientEmail, "Security alert: " + provider + " account linked", htmlBody, textBody);
+    }
+
     private void sendWithRetry(String recipientEmail, String subject, String htmlBody, String textBody) {
         int attempt = 0;
         long backoff = INITIAL_BACKOFF_MS;

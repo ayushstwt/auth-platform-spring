@@ -295,3 +295,49 @@ curl -X POST http://localhost:8080/api/v1/users/me/change-password \
 curl -X GET http://localhost:8080/.well-known/jwks.json
 ```
 
+---
+
+## 7. Google OAuth 2.0 / OpenID Connect (Phase 5)
+
+Full design and account linking policy documentation is available at [docs/oauth-design.md](file:///C:/Users/Dell/OneDrive/Documents/ayshriv-workspace/auth-platform-spring/docs/oauth-design.md).
+
+### 17. Sign in with Google (Native / SPA Client ID Token)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/google \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idToken": "<GOOGLE_ID_TOKEN>"
+  }'
+```
+
+### 18. Exchange Redirect Code for Tokens (Browser Redirect Flow)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/google/exchange \
+  -H "Content-Type: application/json" \
+  -d '{
+    "exchangeCode": "<EXCHANGE_CODE>"
+  }'
+```
+
+### 19. List Linked Identities (Authenticated)
+```bash
+curl -X GET http://localhost:8080/api/v1/users/me/identities \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+### 20. Link Google Account (Authenticated)
+```bash
+curl -X POST http://localhost:8080/api/v1/users/me/identities/google/link \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idToken": "<GOOGLE_ID_TOKEN>"
+  }'
+```
+
+### 21. Unlink Google Account (Authenticated)
+```bash
+curl -X DELETE http://localhost:8080/api/v1/users/me/identities/google \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+

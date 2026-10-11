@@ -218,6 +218,7 @@ public class EmailAuthService {
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         user.setPasswordChangedAt(Instant.now());
+        user.setHasPassword(true);
         userRepository.save(user);
 
         // Revoke all existing sessions and refresh tokens upon password reset

@@ -25,10 +25,14 @@ public class UserController {
 
     private final UserService userService;
     private final PhoneAuthService phoneAuthService;
+    private final com.ayshriv.authplatform.service.GoogleAuthService googleAuthService;
 
-    public UserController(UserService userService, PhoneAuthService phoneAuthService) {
+    public UserController(UserService userService,
+                          PhoneAuthService phoneAuthService,
+                          com.ayshriv.authplatform.service.GoogleAuthService googleAuthService) {
         this.userService = userService;
         this.phoneAuthService = phoneAuthService;
+        this.googleAuthService = googleAuthService;
     }
 
     @GetMapping("/me")
@@ -73,5 +77,30 @@ public class UserController {
         Long userId = SecurityUtils.getAuthenticatedUserId();
         UserResponse response = phoneAuthService.verifyUserPhone(userId, request, servletRequest.getRemoteAddr());
         return ResponseEntity.ok(ApiResponse.success("Phone number verified successfully", response));
+    }
+
+    @GetMapping("/me/identities")
+    @Operation(summary = "List all linked third-party federated identities")
+    public ResponseEntity<ApiResponse<java.util.List<com.ayshriv.authplatform.dto.FederatedIdentityResponse>>> getIdentities() {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        var identities = googleAuthService.getIdentities(userId);
+        return ResponseEntity.ok(ApiResponse.success("Federated identities retrieved successfully", identities));
+    }
+
+    @PostMapping("/me/identities/google/link")
+    @Operation(summary = "Link Google account to existing authenticated user")
+    public ResponseEntity<ApiResponse<com.ayshriv.authplatform.dto.FederatedIdentityResponse>> linkGoogle(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.GoogleTokenLoginRequest request) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        var response = googleAuthService.linkGoogleAccount(userId, request.idToken());
+        return ResponseEntity.ok(ApiResponse.success("Google account linked successfully", response));
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/me/identities/google")
+    @Operation(summary = "Unlink Google account (blocked if no other login method remains)")
+    public ResponseEntity<ApiResponse<Void>> unlinkGoogle() {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        googleAuthService.unlinkGoogleAccount(userId);
+        return ResponseEntity.ok(ApiResponse.success("Google account unlinked successfully", null));
     }
 }

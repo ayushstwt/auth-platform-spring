@@ -32,6 +32,13 @@ public class TestEmailSender implements EmailSender {
         this.lastType = "PASSWORD_RESET";
     }
 
+    @Override
+    public void sendAccountLinkedEmail(String recipientEmail, String recipientName, String provider) {
+        this.lastRecipient = recipientEmail;
+        this.lastCode = provider;
+        this.lastType = "ACCOUNT_LINKED";
+    }
+
     public String getLastRecipient() {
         return lastRecipient;
     }

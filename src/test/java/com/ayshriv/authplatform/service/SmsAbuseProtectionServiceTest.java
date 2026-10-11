@@ -48,8 +48,9 @@ class SmsAbuseProtectionServiceTest {
         AppProperties.SmsProperties sms = new AppProperties.SmsProperties(
                 "logging", "IN", List.of("IN", "US"), List.of("+1900", "+1976"), 5, 20, 5, 100, 3, twilio
         );
+        AppProperties.GoogleProperties google = new AppProperties.GoogleProperties(List.of("client-1"), null, false, "http://localhost:3000", 60, "https://www.googleapis.com/oauth2/v3/certs");
 
-        appProperties = new AppProperties(sec, otp, email, sms);
+        appProperties = new AppProperties(sec, otp, email, sms, google);
         abuseProtectionService = new SmsAbuseProtectionService(rateLimiter, otpChallengeRepository, appProperties);
     }
 
