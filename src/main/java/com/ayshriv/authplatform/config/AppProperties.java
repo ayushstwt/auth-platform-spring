@@ -10,7 +10,9 @@ import java.util.List;
 @Validated
 @ConfigurationProperties(prefix = "app")
 public record AppProperties(
-        @NotNull SecurityProperties security
+        @NotNull SecurityProperties security,
+        @NotNull OtpProperties otp,
+        @NotNull EmailProperties email
 ) {
     public record SecurityProperties(
             @NotNull CorsProperties cors,
@@ -40,7 +42,23 @@ public record AppProperties(
 
     public record AuthProperties(
             int maxFailedAttempts,
-            long lockoutDurationMinutes
+            long lockoutDurationMinutes,
+            boolean requireVerifiedEmailBeforeLogin
+    ) {
+    }
+
+    public record OtpProperties(
+            @NotEmpty String pepper,
+            long ttlMinutes,
+            int maxAttempts,
+            long resendCooldownSeconds,
+            int maxSendsPerHourPerDestination
+    ) {
+    }
+
+    public record EmailProperties(
+            @NotEmpty String fromAddress,
+            @NotEmpty String fromName
     ) {
     }
 }

@@ -13,6 +13,7 @@ import com.ayshriv.authplatform.entity.RefreshToken;
 import com.ayshriv.authplatform.entity.Role;
 import com.ayshriv.authplatform.entity.User;
 import com.ayshriv.authplatform.entity.UserStatus;
+import com.ayshriv.authplatform.exception.ForbiddenException;
 import com.ayshriv.authplatform.exception.ResourceAlreadyExistException;
 import com.ayshriv.authplatform.exception.UnauthorizedException;
 import com.ayshriv.authplatform.repository.RefreshTokenRepository;
@@ -121,6 +122,13 @@ public class AuthService {
             log.warn("Login failure: account locked/inactive for user id={}", user.getId());
             auditService.recordActivity(user.getId(), LogAction.LOGIN, LogSubAction.BLOCKED);
             throw new UnauthorizedException(ErrorMessages.E012);
+        }
+
+        if (appProperties.security().auth().requireVerifiedEmailBeforeLogin() && !user.isEmailVerified()) {
+            passwordEncoder.matches(request.password(), DUMMY_BCRYPT_HASH);
+            log.warn("Login failure: unverified email for user id={}", user.getId());
+            auditService.recordActivity(user.getId(), LogAction.LOGIN, LogSubAction.BLOCKED);
+            throw new ForbiddenException(ErrorMessages.E014);
         }
 
         boolean passwordMatches = passwordEncoder.matches(request.password(), user.getPasswordHash());

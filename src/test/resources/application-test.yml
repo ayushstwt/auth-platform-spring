@@ -48,3 +48,13 @@ app:
     auth:
       max-failed-attempts: 5
       lockout-duration-minutes: 15
+      require-verified-email-before-login: false
+  otp:
+    pepper: test-pepper-secret-key-for-unit-and-integration-tests!
+    ttl-minutes: 5
+    max-attempts: 5
+    resend-cooldown-seconds: 60
+    max-sends-per-hour-per-destination: 5
+  email:
+    from-address: test@ayshriv.com
+    from-name: Ayshriv Test Auth

@@ -50,7 +50,7 @@ Verify versions at start.spring.io and Maven Central before adding or changing a
 ## Current status
 - [x] Phase 1 Foundation
 - [x] Phase 2 Basic auth
-- [ ] Phase 3 Email OTP
+- [x] Phase 3 Email OTP
 - [ ] Phase 4 Phone OTP
 - [ ] Phase 5 Google OAuth
 - [ ] Phase 6 MFA

@@ -16,6 +16,10 @@ public enum ErrorMessages {
     E011(HttpStatus.BAD_REQUEST, "Invalid value '%s' for parameter '%s'"),
     E012(HttpStatus.UNAUTHORIZED, "Invalid credentials"),
     E013(HttpStatus.UNAUTHORIZED, "Token expired or invalid"),
+    E014(HttpStatus.FORBIDDEN, "Email address has not been verified"),
+    E015(HttpStatus.BAD_REQUEST, "Verification code is invalid or has expired"),
+    E016(HttpStatus.TOO_MANY_REQUESTS, "Too many requests. Please wait before trying again"),
+    E017(HttpStatus.BAD_REQUEST, "Maximum attempts reached. Please request a new code"),
     E500(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected internal error occurred");
 
     private final HttpStatus httpStatus;

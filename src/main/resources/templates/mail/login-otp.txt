@@ -1,0 +1,10 @@
+Hello [(${name})],
+
+Use the temporary login code below to complete your sign-in. This code will expire in [(${ttlMinutes})] minutes.
+
+Login Code: [(${code})]
+
+Never share this code with anyone. If you did not request this login code, please secure your account immediately.
+
+--
+Ayshriv Auth Platform

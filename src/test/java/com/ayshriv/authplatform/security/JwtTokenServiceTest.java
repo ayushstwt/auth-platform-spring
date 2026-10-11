@@ -34,9 +34,11 @@ class JwtTokenServiceTest {
                 "",
                 ""
         );
-        AppProperties.AuthProperties authProps = new AppProperties.AuthProperties(5, 15);
+        AppProperties.AuthProperties authProps = new AppProperties.AuthProperties(5, 15, false);
         AppProperties.SecurityProperties secProps = new AppProperties.SecurityProperties(corsProps, jwtProps, authProps);
-        AppProperties appProperties = new AppProperties(secProps);
+        AppProperties.OtpProperties otpProps = new AppProperties.OtpProperties("test-pepper", 5, 5, 60, 5);
+        AppProperties.EmailProperties emailProps = new AppProperties.EmailProperties("test@ayshriv.com", "Test Auth");
+        AppProperties appProperties = new AppProperties(secProps, otpProps, emailProps);
 
         RsaKeyProvider rsaKeyProvider = new RsaKeyProvider(appProperties);
         rsaKeyProvider.init();

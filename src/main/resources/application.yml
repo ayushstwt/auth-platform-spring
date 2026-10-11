@@ -72,3 +72,13 @@ app:
     auth:
       max-failed-attempts: ${AUTH_MAX_FAILED_ATTEMPTS:5}
       lockout-duration-minutes: ${AUTH_LOCKOUT_DURATION_MINUTES:15}
+      require-verified-email-before-login: ${AUTH_REQUIRE_VERIFIED_EMAIL:false}
+  otp:
+    pepper: ${OTP_PEPPER:default-otp-secret-pepper-change-in-production-min-32-bytes!}
+    ttl-minutes: ${OTP_TTL_MINUTES:5}
+    max-attempts: ${OTP_MAX_ATTEMPTS:5}
+    resend-cooldown-seconds: ${OTP_RESEND_COOLDOWN_SECONDS:60}
+    max-sends-per-hour-per-destination: ${OTP_MAX_SENDS_PER_HOUR:5}
+  email:
+    from-address: ${EMAIL_FROM_ADDRESS:noreply@ayshriv.com}
+    from-name: ${EMAIL_FROM_NAME:Ayshriv Auth}

@@ -2,13 +2,19 @@ package com.ayshriv.authplatform.controller;
 
 import com.ayshriv.authplatform.dto.ApiResponse;
 import com.ayshriv.authplatform.dto.AuthResponse;
+import com.ayshriv.authplatform.dto.EmailOtpConfirmRequest;
+import com.ayshriv.authplatform.dto.EmailOtpSendRequest;
+import com.ayshriv.authplatform.dto.ForgotPasswordRequest;
 import com.ayshriv.authplatform.dto.LoginRequest;
 import com.ayshriv.authplatform.dto.LogoutRequest;
 import com.ayshriv.authplatform.dto.RefreshTokenRequest;
 import com.ayshriv.authplatform.dto.RegisterRequest;
+import com.ayshriv.authplatform.dto.ResetPasswordRequest;
 import com.ayshriv.authplatform.dto.UserResponse;
+import com.ayshriv.authplatform.dto.VerifyEmailConfirmRequest;
 import com.ayshriv.authplatform.security.SecurityUtils;
 import com.ayshriv.authplatform.service.AuthService;
+import com.ayshriv.authplatform.service.EmailAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,9 +34,11 @@ import java.net.URI;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailAuthService emailAuthService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, EmailAuthService emailAuthService) {
         this.authService = authService;
+        this.emailAuthService = emailAuthService;
     }
 
     @PostMapping("/register")
@@ -89,5 +97,63 @@ public class AuthController {
         Long userId = SecurityUtils.getAuthenticatedUserId();
         authService.logoutAll(userId);
         return ResponseEntity.ok(ApiResponse.success("All sessions logged out successfully", null));
+    }
+
+    @PostMapping("/email/verify/send")
+    @Operation(summary = "Send verification code to authenticated user's email")
+    public ResponseEntity<ApiResponse<Void>> sendEmailVerification(HttpServletRequest servletRequest) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        emailAuthService.sendEmailVerificationOtp(userId, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Verification code sent to your email", null));
+    }
+
+    @PostMapping("/email/verify/confirm")
+    @Operation(summary = "Confirm email verification using 6-digit code")
+    public ResponseEntity<ApiResponse<Void>> confirmEmailVerification(
+            @Valid @RequestBody VerifyEmailConfirmRequest request,
+            HttpServletRequest servletRequest) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        emailAuthService.confirmEmailVerification(userId, request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Email verified successfully", null));
+    }
+
+    @PostMapping("/login/email-otp/send")
+    @Operation(summary = "Request one-time login code via email (passwordless)")
+    public ResponseEntity<ApiResponse<Void>> sendLoginOtp(
+            @Valid @RequestBody EmailOtpSendRequest request,
+            HttpServletRequest servletRequest) {
+        emailAuthService.sendLoginOtp(request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("If the account exists, a one-time passcode has been sent", null));
+    }
+
+    @PostMapping("/login/email-otp/confirm")
+    @Operation(summary = "Confirm one-time login code and obtain JWT authentication tokens")
+    public ResponseEntity<ApiResponse<AuthResponse>> confirmLoginOtp(
+            @Valid @RequestBody EmailOtpConfirmRequest request,
+            HttpServletRequest servletRequest) {
+        AuthResponse response = emailAuthService.confirmLoginOtp(
+                request,
+                servletRequest.getRemoteAddr(),
+                servletRequest.getHeader("User-Agent")
+        );
+        return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
+    }
+
+    @PostMapping("/password/forgot")
+    @Operation(summary = "Request password reset code via email")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest servletRequest) {
+        emailAuthService.forgotPassword(request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("If the account exists, password reset instructions have been sent", null));
+    }
+
+    @PostMapping("/password/reset")
+    @Operation(summary = "Reset password using OTP code")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request,
+            HttpServletRequest servletRequest) {
+        emailAuthService.resetPassword(request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Password reset successfully. Please log in with your new password", null));
     }
 }

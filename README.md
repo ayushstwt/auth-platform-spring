@@ -136,7 +136,7 @@ Every HTTP request is assigned or preserves a unique `X-Request-Id` correlation 
 
 - [x] **Phase 1: Foundation** (`feature/01-foundation` -> `v0.1.0`)
 - [x] **Phase 2: Basic Auth** (`feature/02-basic-auth` -> `v0.2.0`)
-- [ ] **Phase 3: Email OTP** (`feature/03-email-otp` -> `v0.3.0`)
+- [x] **Phase 3: Email OTP** (`feature/03-email-otp` -> `v0.3.0`)
 - [ ] **Phase 4: Phone OTP** (`feature/04-phone-otp` -> `v0.4.0`)
 - [ ] **Phase 5: Google OAuth** (`feature/05-google-oauth` -> `v0.5.0`)
 - [ ] **Phase 6: MFA** (`feature/06-mfa` -> `v0.6.0`)
@@ -159,7 +159,62 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
   }'
 ```
 
-### 2. Login
+### 2. Send Email Verification OTP
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/email/verify/send \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+### 3. Confirm Email Verification
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/email/verify/confirm \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "123456"
+  }'
+```
+
+### 4. Passwordless Login via Email OTP (Send)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login/email-otp/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane.doe@example.com"
+  }'
+```
+
+### 5. Passwordless Login via Email OTP (Confirm)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login/email-otp/confirm \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane.doe@example.com",
+    "code": "123456"
+  }'
+```
+
+### 6. Forgot Password (Request OTP)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/password/forgot \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane.doe@example.com"
+  }'
+```
+
+### 7. Reset Password (Using OTP)
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/password/reset \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane.doe@example.com",
+    "code": "123456",
+    "newPassword": "NewStrongPassword2026!"
+  }'
+```
+
+### 8. Login (Password)
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -169,7 +224,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   }'
 ```
 
-### 3. Rotate Refresh Token
+### 9. Rotate Refresh Token
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
@@ -178,13 +233,13 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
   }'
 ```
 
-### 4. Get Current User Profile
+### 10. Get Current User Profile
 ```bash
 curl -X GET http://localhost:8080/api/v1/users/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-### 5. Change Password
+### 11. Change Password
 ```bash
 curl -X POST http://localhost:8080/api/v1/users/me/change-password \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
@@ -195,7 +250,7 @@ curl -X POST http://localhost:8080/api/v1/users/me/change-password \
   }'
 ```
 
-### 6. Public JWKS Key Set
+### 12. Public JWKS Key Set
 ```bash
 curl -X GET http://localhost:8080/.well-known/jwks.json
 ```
