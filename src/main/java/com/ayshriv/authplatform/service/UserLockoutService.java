@@ -22,13 +22,16 @@ public class UserLockoutService {
     private final UserRepository userRepository;
     private final AuditService auditService;
     private final AppProperties appProperties;
+    private final com.ayshriv.authplatform.observability.SecurityMetrics securityMetrics;
 
     public UserLockoutService(UserRepository userRepository,
                               AuditService auditService,
-                              AppProperties appProperties) {
+                              AppProperties appProperties,
+                              com.ayshriv.authplatform.observability.SecurityMetrics securityMetrics) {
         this.userRepository = userRepository;
         this.auditService = auditService;
         this.appProperties = appProperties;
+        this.securityMetrics = securityMetrics;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -43,6 +46,7 @@ public class UserLockoutService {
                 user.setLockedUntil(Instant.now().plus(Duration.ofMinutes(lockMinutes)));
                 user.setStatus(UserStatus.LOCKED);
                 auditService.recordActivity(user.getId(), LogAction.ACCOUNT_LOCK, LogSubAction.SUCCESS);
+                securityMetrics.incrementLockout();
                 log.warn("User id={} locked due to {} failed login attempts", user.getId(), failedAttempts);
             }
 

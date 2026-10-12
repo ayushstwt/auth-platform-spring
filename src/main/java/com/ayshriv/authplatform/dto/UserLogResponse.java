@@ -10,6 +10,10 @@ public record UserLogResponse(
         Long userId,
         LogAction action,
         LogSubAction subAction,
+        String ipAddress,
         Instant createdOn
 ) {
+    public UserLogResponse(Long id, Long userId, LogAction action, LogSubAction subAction, Instant createdOn) {
+        this(id, userId, action, subAction, null, createdOn);
+    }
 }

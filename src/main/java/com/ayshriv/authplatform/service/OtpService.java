@@ -32,15 +32,26 @@ public class OtpService {
     private final RateLimiter rateLimiter;
     private final AuditService auditService;
     private final AppProperties appProperties;
+    private final com.ayshriv.authplatform.observability.SecurityMetrics securityMetrics;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public OtpService(OtpChallengeRepository otpChallengeRepository,
+                      RateLimiter rateLimiter,
+                      AuditService auditService,
+                      AppProperties appProperties,
+                      com.ayshriv.authplatform.observability.SecurityMetrics securityMetrics) {
+        this.otpChallengeRepository = otpChallengeRepository;
+        this.rateLimiter = rateLimiter;
+        this.auditService = auditService;
+        this.appProperties = appProperties;
+        this.securityMetrics = securityMetrics;
+    }
 
     public OtpService(OtpChallengeRepository otpChallengeRepository,
                       RateLimiter rateLimiter,
                       AuditService auditService,
                       AppProperties appProperties) {
-        this.otpChallengeRepository = otpChallengeRepository;
-        this.rateLimiter = rateLimiter;
-        this.auditService = auditService;
-        this.appProperties = appProperties;
+        this(otpChallengeRepository, rateLimiter, auditService, appProperties, null);
     }
 
     @Transactional
@@ -111,6 +122,9 @@ public class OtpService {
 
         otpChallengeRepository.save(challenge);
         auditService.recordActivity(userId, LogAction.OTP_REQUEST, LogSubAction.CHALLENGE_ISSUED);
+        if (securityMetrics != null) {
+            securityMetrics.incrementOtpSent();
+        }
         log.info("Issued OTP challenge for purpose: {}, destination: {}", purpose, LogMaskingUtils.maskEmail(normalizedDestination));
 
         return plainCode;
@@ -184,6 +198,9 @@ public class OtpService {
         otpChallengeRepository.save(challenge);
 
         auditService.recordActivity(userId, LogAction.OTP_VERIFY, LogSubAction.SUCCESS);
+        if (securityMetrics != null) {
+            securityMetrics.incrementOtpVerified();
+        }
         log.info("OTP successfully verified for destination: {}, purpose: {}", LogMaskingUtils.maskEmail(normalizedDestination), purpose);
 
         return challenge;

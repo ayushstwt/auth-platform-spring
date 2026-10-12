@@ -41,19 +41,25 @@ public class SecurityConfig {
     private final CorrelationIdFilter correlationIdFilter;
     private final RsaKeyProvider rsaKeyProvider;
     private final com.ayshriv.authplatform.security.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final com.ayshriv.authplatform.security.RateLimitingFilter rateLimitingFilter;
+    private final com.ayshriv.authplatform.security.TokenDenylistService tokenDenylistService;
 
     public SecurityConfig(AppProperties appProperties,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
                           CorrelationIdFilter correlationIdFilter,
                           RsaKeyProvider rsaKeyProvider,
-                          com.ayshriv.authplatform.security.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+                          com.ayshriv.authplatform.security.OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+                          com.ayshriv.authplatform.security.RateLimitingFilter rateLimitingFilter,
+                          com.ayshriv.authplatform.security.TokenDenylistService tokenDenylistService) {
         this.appProperties = appProperties;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.correlationIdFilter = correlationIdFilter;
         this.rsaKeyProvider = rsaKeyProvider;
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+        this.rateLimitingFilter = rateLimitingFilter;
+        this.tokenDenylistService = tokenDenylistService;
     }
 
     @Bean
@@ -68,17 +74,22 @@ public class SecurityConfig {
                 )
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
-                        .contentTypeOptions(HeadersConfigurer.ContentTypeOptionsConfig::disable)
+                        .contentTypeOptions(contentType -> {})
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'none'; frame-ancestors 'none'")
+                        )
                         .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                         .httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
                                 .maxAgeInSeconds(31536000)
+                                .preload(true)
                         )
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/health/**",
                                 "/actuator/info",
+                                "/actuator/prometheus",
                                 "/.well-known/jwks.json",
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
@@ -114,7 +125,8 @@ public class SecurityConfig {
             );
         }
 
-        http.addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(correlationIdFilter, com.ayshriv.authplatform.security.RateLimitingFilter.class);
 
         return http.build();
     }
@@ -125,7 +137,8 @@ public class SecurityConfig {
 
         OAuth2TokenValidator<Jwt> defaultValidator = JwtValidators.createDefaultWithIssuer(appProperties.security().jwt().issuer());
         OAuth2TokenValidator<Jwt> audienceValidator = new JwtAudienceValidator(appProperties.security().jwt().audience());
-        OAuth2TokenValidator<Jwt> combinedValidator = new DelegatingOAuth2TokenValidator<>(defaultValidator, audienceValidator);
+        OAuth2TokenValidator<Jwt> revocationValidator = new com.ayshriv.authplatform.security.JwtRevocationValidator(tokenDenylistService);
+        OAuth2TokenValidator<Jwt> combinedValidator = new DelegatingOAuth2TokenValidator<>(defaultValidator, audienceValidator, revocationValidator);
 
         jwtDecoder.setJwtValidator(combinedValidator);
         return jwtDecoder;

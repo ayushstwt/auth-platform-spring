@@ -72,6 +72,9 @@ public class User extends BaseEntity {
     @Column(name = "PASSWORD_CHANGED_AT")
     private Instant passwordChangedAt;
 
+    @Column(name = "DELETED_AT")
+    private Instant deletedAt;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "USER_ROLES",
@@ -190,6 +193,14 @@ public class User extends BaseEntity {
 
     public void setPasswordChangedAt(Instant passwordChangedAt) {
         this.passwordChangedAt = passwordChangedAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     public Set<Role> getRoles() {

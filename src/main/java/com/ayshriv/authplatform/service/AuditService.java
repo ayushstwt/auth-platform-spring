@@ -26,13 +26,24 @@ public class AuditService {
 
     @Transactional
     public UserLog recordActivity(Long userId, LogAction action, LogSubAction subAction) {
-        log.info("Audit log: userId={} action={} subAction={}", userId, action, subAction);
-        UserLog userLog = new UserLog(userId, action, subAction);
+        return recordActivity(userId, action, subAction, null);
+    }
+
+    @Transactional
+    public UserLog recordActivity(Long userId, LogAction action, LogSubAction subAction, String ipAddress) {
+        log.info("Audit log: userId={} action={} subAction={} ip={}", userId, action, subAction, ipAddress != null ? ipAddress : "n/a");
+        UserLog userLog = new UserLog(userId, action, subAction, ipAddress);
         return userLogRepository.save(userLog);
     }
 
     @Transactional(readOnly = true)
     public Page<UserLogResponse> getUserLogs(Long userId, Pageable pageable) {
         return userLogRepository.findResponsesByUserId(userId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserLogResponse> queryAuditLogs(Long userId, LogAction action, java.time.Instant startDate, java.time.Instant endDate, Pageable pageable) {
+        Page<UserLog> logs = userLogRepository.searchLogs(userId, action, startDate, endDate, pageable);
+        return logs.map(l -> new UserLogResponse(l.getId(), l.getUserId(), l.getAction(), l.getSubAction(), l.getIpAddress(), l.getCreatedOn()));
     }
 }

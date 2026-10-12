@@ -46,6 +46,12 @@ public class RefreshToken extends BaseEntity {
     @Column(name = "USER_AGENT", length = 255)
     private String userAgent;
 
+    @Column(name = "LAST_USED_AT")
+    private Instant lastUsedAt;
+
+    @Column(name = "DEVICE_NAME", length = 150)
+    private String deviceName;
+
     public RefreshToken() {
         super();
     }
@@ -126,6 +132,22 @@ public class RefreshToken extends BaseEntity {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public Instant getLastUsedAt() {
+        return lastUsedAt;
+    }
+
+    public void setLastUsedAt(Instant lastUsedAt) {
+        this.lastUsedAt = lastUsedAt;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     public boolean isExpired() {

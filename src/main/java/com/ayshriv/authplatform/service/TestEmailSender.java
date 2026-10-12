@@ -39,6 +39,13 @@ public class TestEmailSender implements EmailSender {
         this.lastType = "ACCOUNT_LINKED";
     }
 
+    @Override
+    public void sendSecurityAlertEmail(String recipientEmail, String recipientName, String alertDetails) {
+        this.lastRecipient = recipientEmail;
+        this.lastCode = alertDetails;
+        this.lastType = "SECURITY_ALERT";
+    }
+
     public String getLastRecipient() {
         return lastRecipient;
     }

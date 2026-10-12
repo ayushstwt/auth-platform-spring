@@ -27,6 +27,9 @@ public class UserLog extends BaseEntity {
     @Column(name = "SUB_ACTION", length = 100)
     private LogSubAction subAction;
 
+    @Column(name = "IP_ADDRESS", length = 45)
+    private String ipAddress;
+
     public UserLog() {
         super();
     }
@@ -36,10 +39,15 @@ public class UserLog extends BaseEntity {
     }
 
     public UserLog(Long userId, LogAction action, LogSubAction subAction) {
+        this(userId, action, subAction, null);
+    }
+
+    public UserLog(Long userId, LogAction action, LogSubAction subAction, String ipAddress) {
         super();
         this.userId = userId;
         this.action = action;
         this.subAction = subAction;
+        this.ipAddress = ipAddress;
     }
 
     public Long getUserId() {
@@ -64,5 +72,13 @@ public class UserLog extends BaseEntity {
 
     public void setSubAction(LogSubAction subAction) {
         this.subAction = subAction;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 }

@@ -50,6 +50,8 @@ public class AuthService {
     private final AuditService auditService;
     private final UserLockoutService userLockoutService;
     private final TokenRevocationService tokenRevocationService;
+    private final SessionManagementService sessionManagementService;
+    private final com.ayshriv.authplatform.observability.SecurityMetrics securityMetrics;
     private final AppProperties appProperties;
 
     public AuthService(UserRepository userRepository,
@@ -61,6 +63,8 @@ public class AuthService {
                        AuditService auditService,
                        UserLockoutService userLockoutService,
                        TokenRevocationService tokenRevocationService,
+                       SessionManagementService sessionManagementService,
+                       com.ayshriv.authplatform.observability.SecurityMetrics securityMetrics,
                        AppProperties appProperties) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -71,6 +75,8 @@ public class AuthService {
         this.auditService = auditService;
         this.userLockoutService = userLockoutService;
         this.tokenRevocationService = tokenRevocationService;
+        this.sessionManagementService = sessionManagementService;
+        this.securityMetrics = securityMetrics;
         this.appProperties = appProperties;
     }
 
@@ -134,12 +140,16 @@ public class AuthService {
         boolean passwordMatches = passwordEncoder.matches(request.password(), user.getPasswordHash());
 
         if (!passwordMatches) {
+            securityMetrics.incrementLoginFailure();
             userLockoutService.recordFailedLogin(user.getId());
             throw new UnauthorizedException(ErrorMessages.E012);
         }
 
         userLockoutService.resetFailedLogins(user.getId());
         handleSuccessfulLogin(user, request.password());
+
+        // Check and send new-device security alert if applicable
+        sessionManagementService.checkAndAlertNewDeviceLogin(user, ipAddress, userAgent);
 
         String accessToken = jwtTokenService.generateAccessToken(user);
         String rawRefreshToken = TokenHashUtils.generateSecureToken();
@@ -148,9 +158,11 @@ public class AuthService {
         Instant expiresAt = Instant.now().plus(Duration.ofDays(appProperties.security().jwt().refreshTokenExpiryDays()));
 
         RefreshToken refreshToken = new RefreshToken(user, refreshTokenHash, familyId, expiresAt, ipAddress, userAgent);
+        refreshToken.setLastUsedAt(Instant.now());
         refreshTokenRepository.save(refreshToken);
 
-        auditService.recordActivity(user.getId(), LogAction.LOGIN, LogSubAction.SUCCESS);
+        auditService.recordActivity(user.getId(), LogAction.LOGIN, LogSubAction.SUCCESS, ipAddress);
+        securityMetrics.incrementLoginSuccess();
         log.info("Login successful for user id={}", user.getId());
 
         return AuthResponse.of(

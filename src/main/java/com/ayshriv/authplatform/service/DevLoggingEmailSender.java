@@ -55,4 +55,15 @@ public class DevLoggingEmailSender implements EmailSender {
         System.out.println(" Provider: " + provider);
         System.out.println("==================================================");
     }
+
+    @Override
+    public void sendSecurityAlertEmail(String recipientEmail, String recipientName, String alertDetails) {
+        log.info("[DEV EMAIL] To: {} ({}) | Subject: Security Alert | Details: {}",
+                LogMaskingUtils.maskEmail(recipientEmail), recipientName, alertDetails);
+        System.out.println("==================================================");
+        System.out.println(" [DEV EMAIL SENDER] SECURITY ALERT");
+        System.out.println(" Recipient: " + recipientEmail);
+        System.out.println(" Details: " + alertDetails);
+        System.out.println("==================================================");
+    }
 }

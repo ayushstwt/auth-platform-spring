@@ -3,6 +3,7 @@ package com.ayshriv.authplatform.config;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
@@ -19,8 +20,65 @@ public record AppProperties(
     public record SecurityProperties(
             @NotNull CorsProperties cors,
             @NotNull JwtProperties jwt,
-            @NotNull AuthProperties auth
+            @NotNull AuthProperties auth,
+            RateLimitProperties rateLimit,
+            TokenDenylistProperties tokenDenylist
     ) {
+        @ConstructorBinding
+        public SecurityProperties(
+                CorsProperties cors,
+                JwtProperties jwt,
+                AuthProperties auth,
+                RateLimitProperties rateLimit,
+                TokenDenylistProperties tokenDenylist
+        ) {
+            this.cors = cors;
+            this.jwt = jwt;
+            this.auth = auth;
+            this.rateLimit = rateLimit != null ? rateLimit : new RateLimitProperties("in-memory", 30, 10, 120, 60);
+            this.tokenDenylist = tokenDenylist != null ? tokenDenylist : new TokenDenylistProperties(true, 15);
+        }
+
+        public SecurityProperties(CorsProperties cors, JwtProperties jwt, AuthProperties auth) {
+            this(cors, jwt, auth, new RateLimitProperties("in-memory", 30, 10, 120, 60), new TokenDenylistProperties(true, 15));
+        }
+    }
+
+    public record RateLimitProperties(
+            String type, // "in-memory" or "redis"
+            int authRequestsPerMinute,
+            int otpRequestsPerMinute,
+            int adminRequestsPerMinute,
+            int defaultRequestsPerMinute
+    ) {
+        public RateLimitProperties {
+            if (type == null || type.isBlank()) {
+                type = "in-memory";
+            }
+            if (authRequestsPerMinute <= 0) {
+                authRequestsPerMinute = 30;
+            }
+            if (otpRequestsPerMinute <= 0) {
+                otpRequestsPerMinute = 10;
+            }
+            if (adminRequestsPerMinute <= 0) {
+                adminRequestsPerMinute = 120;
+            }
+            if (defaultRequestsPerMinute <= 0) {
+                defaultRequestsPerMinute = 60;
+            }
+        }
+    }
+
+    public record TokenDenylistProperties(
+            boolean enabled,
+            long cacheTtlMinutes
+    ) {
+        public TokenDenylistProperties {
+            if (cacheTtlMinutes <= 0) {
+                cacheTtlMinutes = 15;
+            }
+        }
     }
 
     public record CorsProperties(

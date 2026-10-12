@@ -22,6 +22,19 @@ public class AsyncConfig {
         executor.setThreadNamePrefix("email-exec-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
+        executor.setTaskDecorator(runnable -> {
+            var contextMap = org.slf4j.MDC.getCopyOfContextMap();
+            return () -> {
+                if (contextMap != null) {
+                    org.slf4j.MDC.setContextMap(contextMap);
+                }
+                try {
+                    runnable.run();
+                } finally {
+                    org.slf4j.MDC.clear();
+                }
+            };
+        });
         executor.initialize();
         return executor;
     }

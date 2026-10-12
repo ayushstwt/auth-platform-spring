@@ -90,6 +90,13 @@ public class SmtpEmailSender implements EmailSender {
         sendWithRetry(recipientEmail, "Security alert: " + provider + " account linked", htmlBody, textBody);
     }
 
+    @Override
+    @Async("emailTaskExecutor")
+    public void sendSecurityAlertEmail(String recipientEmail, String recipientName, String alertDetails) {
+        String subject = "Security Alert: New Sign-In to Your Account";
+        sendWithRetry(recipientEmail, subject, "<p>" + alertDetails + "</p>", alertDetails);
+    }
+
     private void sendWithRetry(String recipientEmail, String subject, String htmlBody, String textBody) {
         int attempt = 0;
         long backoff = INITIAL_BACKOFF_MS;

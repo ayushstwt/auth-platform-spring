@@ -22,4 +22,16 @@ public interface UserLogRepository extends JpaRepository<UserLog, Long> {
     Page<UserLogResponse> findResponsesByUserId(@Param("userId") Long userId, Pageable pageable);
 
     Page<UserLog> findByUserIdOrderByCreatedOnDescIdDesc(Long userId, Pageable pageable);
+
+    @Query("SELECT l FROM UserLog l WHERE " +
+           "(:userId IS NULL OR l.userId = :userId) AND " +
+           "(:action IS NULL OR l.action = :action) AND " +
+           "(:startDate IS NULL OR l.createdOn >= :startDate) AND " +
+           "(:endDate IS NULL OR l.createdOn <= :endDate) " +
+           "ORDER BY l.createdOn DESC, l.id DESC")
+    Page<UserLog> searchLogs(@Param("userId") Long userId,
+                            @Param("action") com.ayshriv.authplatform.entity.LogAction action,
+                            @Param("startDate") java.time.Instant startDate,
+                            @Param("endDate") java.time.Instant endDate,
+                            Pageable pageable);
 }

@@ -103,4 +103,40 @@ public class UserController {
         googleAuthService.unlinkGoogleAccount(userId);
         return ResponseEntity.ok(ApiResponse.success("Google account unlinked successfully", null));
     }
+
+    @PostMapping("/me/email/request")
+    @Operation(summary = "Request email address change by issuing OTP to the new email")
+    public ResponseEntity<ApiResponse<Void>> requestEmailChange(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.EmailChangeRequest request,
+            jakarta.servlet.http.HttpServletRequest servletRequest) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        userService.requestEmailChange(userId, request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Verification code sent to new email address", null));
+    }
+
+    @PostMapping("/me/email/confirm")
+    @Operation(summary = "Confirm email address change using OTP code")
+    public ResponseEntity<ApiResponse<UserResponse>> confirmEmailChange(
+            @Valid @RequestBody com.ayshriv.authplatform.dto.EmailChangeConfirmRequest request,
+            jakarta.servlet.http.HttpServletRequest servletRequest) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        UserResponse response = userService.confirmEmailChange(userId, request, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Email address updated successfully", response));
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/me")
+    @Operation(summary = "Soft-delete authenticated user account")
+    public ResponseEntity<ApiResponse<Void>> deleteAccount(jakarta.servlet.http.HttpServletRequest servletRequest) {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        userService.softDeleteUser(userId, servletRequest.getRemoteAddr());
+        return ResponseEntity.ok(ApiResponse.success("Account deleted successfully", null));
+    }
+
+    @GetMapping("/me/export")
+    @Operation(summary = "Export all personal data belonging to the current user (GDPR/Data Portability)")
+    public ResponseEntity<ApiResponse<com.ayshriv.authplatform.dto.UserDataExportResponse>> exportData() {
+        Long userId = SecurityUtils.getAuthenticatedUserId();
+        var export = userService.exportUserData(userId);
+        return ResponseEntity.ok(ApiResponse.success("User data exported successfully", export));
+    }
 }

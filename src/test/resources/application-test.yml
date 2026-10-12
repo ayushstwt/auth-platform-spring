@@ -41,6 +41,11 @@ logging:
     com.ayshriv.authplatform: DEBUG
     org.springframework.security: WARN
 
+management:
+  health:
+    redis:
+      enabled: false
+
 app:
   security:
     cors:
@@ -61,6 +66,15 @@ app:
       lockout-duration-minutes: 15
       require-verified-email-before-login: false
       reauth-validity-minutes: 10
+    rate-limit:
+      type: in-memory
+      auth-requests-per-minute: 300
+      otp-requests-per-minute: 100
+      admin-requests-per-minute: 500
+      default-requests-per-minute: 300
+    token-denylist:
+      enabled: true
+      cache-ttl-minutes: 15
   otp:
     pepper: test-pepper-secret-key-for-unit-and-integration-tests!
     ttl-minutes: 5

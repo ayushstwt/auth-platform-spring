@@ -54,5 +54,5 @@ Verify versions at start.spring.io and Maven Central before adding or changing a
 - [x] Phase 4 Phone OTP
 - [x] Phase 5 Google OAuth
 - [ ] Phase 6 MFA
-- [ ] Phase 7 Hardening
+- [x] Phase 7 Hardening
 - [ ] Phase 8 Release

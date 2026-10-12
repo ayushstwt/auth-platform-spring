@@ -1,6 +1,7 @@
 package com.ayshriv.authplatform.security;
 
 import com.ayshriv.authplatform.config.AppProperties;
+import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import jakarta.annotation.PostConstruct;
@@ -13,7 +14,12 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RsaKeyProvider {
@@ -21,10 +27,8 @@ public class RsaKeyProvider {
     private static final Logger log = LoggerFactory.getLogger(RsaKeyProvider.class);
 
     private final AppProperties appProperties;
-    private RSAPublicKey publicKey;
-    private RSAPrivateKey privateKey;
-    private String keyId;
-    private RSAKey rsaJwk;
+    private final Map<String, RSAKey> keyStore = new ConcurrentHashMap<>();
+    private volatile String activeKeyId;
 
     public RsaKeyProvider(AppProperties appProperties) {
         this.appProperties = appProperties;
@@ -32,43 +36,71 @@ public class RsaKeyProvider {
 
     @PostConstruct
     public void init() {
-        this.keyId = "auth-platform-key-" + UUID.randomUUID().toString().substring(0, 8);
+        rotateKey();
+    }
+
+    public synchronized String rotateKey() {
+        String newKeyId = "auth-platform-key-" + UUID.randomUUID().toString().substring(0, 8);
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
             generator.initialize(2048);
             KeyPair keyPair = generator.generateKeyPair();
 
-            this.publicKey = (RSAPublicKey) keyPair.getPublic();
-            this.privateKey = (RSAPrivateKey) keyPair.getPrivate();
+            RSAPublicKey pub = (RSAPublicKey) keyPair.getPublic();
+            RSAPrivateKey priv = (RSAPrivateKey) keyPair.getPrivate();
 
-            this.rsaJwk = new RSAKey.Builder(this.publicKey)
-                    .privateKey(this.privateKey)
-                    .keyID(this.keyId)
+            RSAKey rsaJwk = new RSAKey.Builder(pub)
+                    .privateKey(priv)
+                    .keyID(newKeyId)
                     .build();
 
-            log.info("Initialized RSA 2048-bit keypair with key ID: {}", this.keyId);
+            keyStore.put(newKeyId, rsaJwk);
+            this.activeKeyId = newKeyId;
+
+            log.info("Rotated/initialized active RSA signing key with key ID: {}. Total keys in JWKS: {}", newKeyId, keyStore.size());
+            return newKeyId;
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Failed to initialize RSA key pair", e);
         }
     }
 
     public RSAPublicKey getPublicKey() {
-        return publicKey;
+        try {
+            return keyStore.get(activeKeyId).toRSAPublicKey();
+        } catch (com.nimbusds.jose.JOSEException e) {
+            throw new IllegalStateException("Failed to extract active RSA public key", e);
+        }
     }
 
     public RSAPrivateKey getPrivateKey() {
-        return privateKey;
+        try {
+            return keyStore.get(activeKeyId).toRSAPrivateKey();
+        } catch (com.nimbusds.jose.JOSEException e) {
+            throw new IllegalStateException("Failed to extract active RSA private key", e);
+        }
     }
 
     public String getKeyId() {
-        return keyId;
+        return activeKeyId;
     }
 
     public RSAKey getRsaJwk() {
-        return rsaJwk;
+        return keyStore.get(activeKeyId);
+    }
+
+    public RSAKey getKeyById(String kid) {
+        return keyStore.get(kid);
     }
 
     public JWKSet getJwkSet() {
-        return new JWKSet(rsaJwk.toPublicJWK());
+        List<JWK> publicKeys = new ArrayList<>();
+        for (RSAKey key : keyStore.values()) {
+            publicKeys.add(key.toPublicJWK());
+        }
+        return new JWKSet(publicKeys);
+    }
+
+    public Map<String, RSAKey> getAllKeys() {
+        return Collections.unmodifiableMap(keyStore);
     }
 }
