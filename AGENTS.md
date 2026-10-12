@@ -55,4 +55,4 @@ Verify versions at start.spring.io and Maven Central before adding or changing a
 - [x] Phase 5 Google OAuth
 - [ ] Phase 6 MFA
 - [x] Phase 7 Hardening
-- [ ] Phase 8 Release
+- [x] Phase 8 Release
