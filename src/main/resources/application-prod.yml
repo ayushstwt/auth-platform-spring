@@ -18,5 +18,10 @@ springdoc:
 logging:
   level:
     root: INFO
-    com.iosocket.userservice: INFO
+    com.ayshriv.authplatform: INFO
     org.springframework.security: WARN
+
+app:
+  security:
+    auth:
+      require-verified-email-before-login: ${AUTH_REQUIRE_VERIFIED_EMAIL:true}

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${TEST_DB_URL:jdbc:h2:mem:userservice_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1}
+    url: ${TEST_DB_URL:jdbc:h2:mem:authplatform_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1}
     username: ${TEST_DB_USERNAME:sa}
     password: ${TEST_DB_PASSWORD:}
     driver-class-name: ${TEST_DB_DRIVER:org.h2.Driver}
@@ -16,6 +16,17 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-google-client-id
+            client-secret: test-google-client-secret
+            scope:
+              - openid
+              - profile
+              - email
 
 server:
   port: 0
@@ -27,5 +38,70 @@ server:
 logging:
   level:
     root: INFO
-    com.iosocket.userservice: DEBUG
+    com.ayshriv.authplatform: DEBUG
     org.springframework.security: WARN
+
+management:
+  health:
+    redis:
+      enabled: false
+
+app:
+  security:
+    cors:
+      allowed-origins: http://localhost:3000
+      allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+      allowed-headers: Authorization,Content-Type,X-Request-Id,Accept,Origin
+      allow-credentials: true
+      max-age-seconds: 3600
+    jwt:
+      issuer: auth-platform-spring-test
+      audience: auth-platform-spring-test-api
+      access-token-expiry-minutes: 15
+      refresh-token-expiry-days: 7
+      private-key-location: ""
+      public-key-location: ""
+    auth:
+      max-failed-attempts: 5
+      lockout-duration-minutes: 15
+      require-verified-email-before-login: false
+      reauth-validity-minutes: 10
+    rate-limit:
+      type: in-memory
+      auth-requests-per-minute: 300
+      otp-requests-per-minute: 100
+      admin-requests-per-minute: 500
+      default-requests-per-minute: 300
+    token-denylist:
+      enabled: true
+      cache-ttl-minutes: 15
+  otp:
+    pepper: test-pepper-secret-key-for-unit-and-integration-tests!
+    ttl-minutes: 5
+    max-attempts: 5
+    resend-cooldown-seconds: 60
+    max-sends-per-hour-per-destination: 5
+  email:
+    from-address: test@ayshriv.com
+    from-name: Ayshriv Test Auth
+  sms:
+    provider: logging
+    default-region: IN
+    allowed-country-codes: IN,US,GB
+    blocked-prefixes: +1900,+1976
+    max-sends-per-hour-per-phone: 5
+    max-sends-per-hour-per-ip: 20
+    max-sends-per-hour-per-user: 5
+    global-hourly-cap: 100
+    daily-cost-guard-limit: 50
+    twilio:
+      account-sid: ACtest1234567890
+      auth-token: authtokentest
+      from-phone-number: +15005550006
+  google:
+    client-ids: test-google-client-id-1,test-google-client-id-2
+    hosted-domain: ""
+    redirect-flow-enabled: true
+    redirect-success-url: http://localhost:3000/oauth2/callback
+    exchange-code-ttl-seconds: 60
+    jwks-uri: https://www.googleapis.com/oauth2/v3/certs

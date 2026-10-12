@@ -1,8 +1,6 @@
 spring:
   application:
-    name: user-service
-  profiles:
-    active: dev
+    name: auth-platform-spring
 
   jpa:
     open-in-view: false
@@ -23,9 +21,29 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID:dummy-google-client-id}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:dummy-google-client-secret}
+            scope:
+              - openid
+              - profile
+              - email
+
 server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
+  server-header: ""
+  forward-headers-strategy: framework
+  max-http-request-header-size: 16KB
   error:
     include-stacktrace: never
     include-message: never
@@ -36,22 +54,28 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
   endpoint:
     health:
       show-details: when_authorized
       probes:
         enabled: true
-  info:
-    env:
-      enabled: true
+      group:
+        readiness:
+          include: db
+        liveness:
+          include: ping
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 logging:
   pattern:
     console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
   level:
     root: INFO
-    com.iosocket.userservice: DEBUG
+    com.ayshriv.authplatform: DEBUG
     org.springframework.security: INFO
 
 app:
@@ -62,3 +86,54 @@ app:
       allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type,X-Request-Id,Accept,Origin}
       allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
       max-age-seconds: ${CORS_MAX_AGE_SECONDS:3600}
+    jwt:
+      issuer: ${JWT_ISSUER:auth-platform-spring}
+      audience: ${JWT_AUDIENCE:auth-platform-spring-api}
+      access-token-expiry-minutes: ${JWT_ACCESS_TOKEN_EXPIRY_MINUTES:15}
+      refresh-token-expiry-days: ${JWT_REFRESH_TOKEN_EXPIRY_DAYS:7}
+      private-key-location: ${JWT_PRIVATE_KEY_LOCATION:}
+      public-key-location: ${JWT_PUBLIC_KEY_LOCATION:}
+    auth:
+      max-failed-attempts: ${AUTH_MAX_FAILED_ATTEMPTS:5}
+      lockout-duration-minutes: ${AUTH_LOCKOUT_DURATION_MINUTES:15}
+      require-verified-email-before-login: ${AUTH_REQUIRE_VERIFIED_EMAIL:false}
+      reauth-validity-minutes: ${AUTH_REAUTH_VALIDITY_MINUTES:10}
+    rate-limit:
+      type: ${RATE_LIMIT_TYPE:in-memory}
+      auth-requests-per-minute: ${RATE_LIMIT_AUTH_PER_MINUTE:30}
+      otp-requests-per-minute: ${RATE_LIMIT_OTP_PER_MINUTE:10}
+      admin-requests-per-minute: ${RATE_LIMIT_ADMIN_PER_MINUTE:120}
+      default-requests-per-minute: ${RATE_LIMIT_DEFAULT_PER_MINUTE:60}
+    token-denylist:
+      enabled: ${TOKEN_DENYLIST_ENABLED:true}
+      cache-ttl-minutes: ${TOKEN_DENYLIST_TTL_MINUTES:15}
+  otp:
+    pepper: ${OTP_PEPPER:default-otp-secret-pepper-change-in-production-min-32-bytes!}
+    ttl-minutes: ${OTP_TTL_MINUTES:5}
+    max-attempts: ${OTP_MAX_ATTEMPTS:5}
+    resend-cooldown-seconds: ${OTP_RESEND_COOLDOWN_SECONDS:60}
+    max-sends-per-hour-per-destination: ${OTP_MAX_SENDS_PER_HOUR:5}
+  email:
+    from-address: ${EMAIL_FROM_ADDRESS:noreply@ayshriv.com}
+    from-name: ${EMAIL_FROM_NAME:Ayshriv Auth}
+  sms:
+    provider: ${SMS_PROVIDER:logging}
+    default-region: ${SMS_DEFAULT_REGION:IN}
+    allowed-country-codes: ${SMS_ALLOWED_COUNTRY_CODES:IN,US,GB}
+    blocked-prefixes: ${SMS_BLOCKED_PREFIXES:+1900,+1976,+4490}
+    max-sends-per-hour-per-phone: ${SMS_MAX_SENDS_PER_HOUR_PHONE:5}
+    max-sends-per-hour-per-ip: ${SMS_MAX_SENDS_PER_HOUR_IP:20}
+    max-sends-per-hour-per-user: ${SMS_MAX_SENDS_PER_HOUR_USER:5}
+    global-hourly-cap: ${SMS_GLOBAL_HOURLY_CAP:100}
+    daily-cost-guard-limit: ${SMS_DAILY_COST_GUARD_LIMIT:500}
+    twilio:
+      account-sid: ${TWILIO_ACCOUNT_SID:}
+      authToken: ${TWILIO_AUTH_TOKEN:}
+      from-phone-number: ${TWILIO_FROM_PHONE_NUMBER:}
+  google:
+    client-ids: ${GOOGLE_CLIENT_IDS:sample-google-client-id.apps.googleusercontent.com}
+    hosted-domain: ${GOOGLE_HOSTED_DOMAIN:}
+    redirect-flow-enabled: ${GOOGLE_REDIRECT_FLOW_ENABLED:false}
+    redirect-success-url: ${GOOGLE_REDIRECT_SUCCESS_URL:http://localhost:3000/oauth2/callback}
+    exchange-code-ttl-seconds: ${GOOGLE_EXCHANGE_CODE_TTL_SECONDS:60}
+    jwks-uri: ${GOOGLE_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}

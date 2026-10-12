@@ -1,0 +1,10 @@
+Hello [(${name})],
+
+Security Alert: Your account was automatically linked with your [(${provider})] account because both accounts share the same verified email address.
+
+You can now sign in using either your existing credentials or your [(${provider})] account.
+
+If you did not authorize this change, please sign in to your account immediately to unlink this provider and update your security settings.
+
+--
+Ayshriv Auth Platform
